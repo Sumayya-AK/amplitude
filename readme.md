@@ -63,14 +63,14 @@ To collect EEG data while playing the game, follow these steps:
     - Use a notch filter at 50 Hz to remove power line noise.
     - use the OSCAR filter if you want to remove eye blinks and muscle artifacts.
 
-1. Run the `cit_server.py` script to start collecting the EEG data and analyse the data
+1. Run the `capture_lie.py` and `lie_multiple_markers.py` scripts simulataneously in 2 different terminals to start collecting the EEG data.
 
 
 1. After you finish playing the game, stop the data collection script by pressing `Ctrl + C` in the terminal.
 
 ## Data Analysis 🔍
 
-Once you have collected the EEG data, you can analyze it using the analysis tab. 
+Once you have collected the EEG data, you can analyze it by running `visualiser.py`
 This includes the following steps:
 
 1. Load the EEG data 
