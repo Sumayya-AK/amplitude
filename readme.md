@@ -47,21 +47,6 @@ pip install -r requirements.txt
 This will create a virtual environment named eeg and install all required dependencies listed in requirements.txt.
 ```
 
-### Download the Game 🎮
-For this hackathon, we’ll use "Canabalt" a classic endless runner game where players jump over obstacles by pressing the space bar. This setup provides us with clean, well-defined stimulus onset events (space bar presses) for EEG data collection.
-
-We’ve also included an alternative game, "2048" which offers a more relaxed gameplay experience but involves more complex controls.
-
-To get started with _Canabalt_:
-
-1. Clone or download the open-source repository from GitHub: [Canabalt GitHub Repo](https://github.com/ninjamuffin99/canabalt-hf).
-1. Follow the instructions in the repository to compile the game for Windows. \
-    If you encounter issues compiling it for Windows:
-    - Try compiling it for HTML5 instead.
-    - You’ll need [Node.js](https://nodejs.org/en/download) installed on your system to run it in your browser.
-
-Let us know if you encounter any issues or have questions during setup — happy hacking! 🚀
-
 
 ## Data Collection 📊
 
