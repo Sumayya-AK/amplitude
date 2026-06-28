@@ -81,3 +81,9 @@ This includes the following steps:
 ## EEG LIE DETECTION
 
 Lie can be detected based on the ERP signals, especially P300. CIT test is used to identify weather the suspect is lying.
+
+## WORKFLOW 
+Stage 1 — Stimulus presentation (lie_multiple_markers.py): builds trial sequence (irrelevant×5 + probe + target per block, ×15 blocks), shows images via pygame, sends LSL marker at image onset to CIT_Markers stream.
+Stage 2 — Capture (capture_lie.py + utils.py): connects to Unicorn EEG LSL stream + CIT_Markers stream via MarkerListener, writes per-sample CSV rows (sys_time, eeg_time, ch1-8, stimulus) to two logs (_prc_log.csv and _raw_log.csv).
+Stage 3 — Analysis (visualiser.py): loads CSV into MNE, notch+bandpass filter, epochs around stimulus codes, baseline correction, computes evoked averages, plots overlays + P300 window means.
+This is a clean 3-stage linear pipeline with one cross-cutting connector (the LSL CIT_Markers stream linking stage 1 and stage 2 in real time). Let me build this as a flowchart.
