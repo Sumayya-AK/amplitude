@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>P300-CIT · Lügendetektion · Unicorn Hybrid Black</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0A0E13; --panel:#10161F; --panel2:#0D131B; --line:#1C2733; --grid:#192330;
+  --bone:#E9E7DF; --mute:#8593A1; --faint:#586675;
+  --amber:#FFB347; --amber-d:#C8861F; --slate:#5E82A6; --slate-d:#3C566E; --red:#FF5C7A; --teal:#46E0C8;
+  --c-irr:#8593A1; --c-tgt:#5BD17A; --c-p1:#FF5C7A; --c-p2:#FFB347; --c-p3:#B98CFF; --c-pool:#FFD27A;
+}
+*{box-sizing:border-box} html,body{margin:0}
+body{background:radial-gradient(1200px 600px at 80% -8%,rgba(255,179,71,.06),transparent 60%),radial-gradient(900px 700px at -5% 110%,rgba(70,224,200,.05),transparent 55%),var(--ink);
+  color:var(--bone);font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;-webkit-font-smoothing:antialiased;line-height:1.5}
+.wrap{max-width:1140px;margin:0 auto;padding:30px 24px 80px}
+.disp{font-family:"Space Grotesk",sans-serif}
+h1{font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:29px;letter-spacing:-.01em;margin:8px 0 3px;line-height:1.07}
+h1 .sub{color:var(--mute);font-weight:500}
+.eyebrow{font-size:11px;letter-spacing:.32em;color:var(--amber);text-transform:uppercase;font-weight:600}
+.lede{font-size:12.5px;color:var(--mute);max-width:66ch;margin:5px 0 0}
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:18px}
+.lang{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.lang button{background:transparent;border:0;color:var(--mute);font-family:inherit;font-size:12px;padding:7px 13px;cursor:pointer;letter-spacing:.05em}
+.lang button.on{background:var(--amber);color:#1a1206;font-weight:600}
+.banner{margin-top:16px;border:1px solid var(--slate-d);border-left-width:3px;border-radius:10px;background:rgba(94,130,166,.07);padding:11px 15px;display:flex;gap:12px;align-items:flex-start;font-size:11.5px;color:#cdd9e6}
+.banner svg{flex:0 0 auto;width:18px;height:18px;margin-top:1px;color:var(--slate)}
+.banner b{color:var(--bone);font-weight:600}
+
+.tabs{display:flex;gap:4px;margin:22px 0 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.tabs button{background:transparent;border:0;border-bottom:2px solid transparent;color:var(--mute);font-family:"Space Grotesk",sans-serif;font-size:13.5px;font-weight:600;padding:11px 15px 13px;cursor:pointer;display:flex;align-items:center;gap:9px}
+.tabs button .n{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--faint);border:1px solid var(--line);border-radius:5px;padding:1px 6px}
+.tabs button.on{color:var(--bone);border-bottom-color:var(--amber)}
+.tabs button.on .n{color:var(--amber);border-color:var(--amber-d)}
+.pane{display:none}.pane.on{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:17px;margin-bottom:16px}
+.card h2{font-family:"Space Grotesk",sans-serif;font-size:13px;letter-spacing:.04em;margin:0 0 3px;color:var(--bone);font-weight:600;text-transform:uppercase}
+.card .desc{font-size:11.5px;color:var(--mute);margin:0 0 13px;max-width:80ch}
+.cap{font-size:10px;letter-spacing:.2em;color:var(--faint);text-transform:uppercase}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.btn{background:transparent;border:1px solid var(--line);border-radius:9px;color:var(--bone);font-family:inherit;font-size:12.5px;padding:9px 14px;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:8px}
+.btn:hover{border-color:var(--faint)}
+.btn.primary{background:var(--amber);color:#1a1206;border-color:var(--amber);font-weight:600}
+.btn.primary:hover{background:#ffbf63}
+.btn.danger{background:var(--red);color:#220910;border-color:var(--red);font-weight:600}
+.btn.tealb{border-color:var(--slate-d);color:#9DBBD8}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn svg{width:15px;height:15px}
+
+.uploader,.drop{border:1.5px dashed var(--line);border-radius:13px;padding:22px;text-align:center;background:var(--panel2);cursor:pointer;transition:.15s}
+.uploader.drag,.drop.drag{border-color:var(--amber);background:rgba(255,179,71,.05)}
+.uploader .big,.drop .big{font-family:"Space Grotesk";font-size:13.5px;color:var(--bone);font-weight:600}
+.uploader p{margin:6px 0 0;font-size:12px;color:var(--mute)}
+.cats{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:15px}
+.cat{border:1px solid var(--line);border-radius:12px;background:var(--panel2);padding:11px;min-height:110px}
+.cat.probe{border-top:3px solid var(--c-p1)} .cat.irrelevant{border-top:3px solid var(--c-irr)} .cat.target{border-top:3px solid var(--c-tgt)}
+.cat h3{font-family:"Space Grotesk",sans-serif;font-size:12px;margin:0 0 2px;color:var(--bone);font-weight:600;display:flex;justify-content:space-between}
+.cat h3 .ct{font-family:"IBM Plex Mono";font-size:10px;color:var(--faint)}
+.cat .hint{font-size:10px;color:var(--faint);margin:0 0 9px}
+.chip{display:flex;gap:9px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:6px;margin-bottom:7px}
+.chip img{width:40px;height:30px;object-fit:cover;border-radius:5px;background:#000;flex:0 0 auto}
+.chip .nm{font-size:10px;color:var(--bone);flex:1;word-break:break-all;line-height:1.2}
+.chip .code{font-family:"Space Grotesk";font-size:11px;font-weight:600;color:var(--amber);flex:0 0 auto}
+.chip .mv{display:flex;gap:3px;flex:0 0 auto}
+.chip .mv button{width:23px;height:23px;border:1px solid var(--line);background:transparent;color:var(--faint);border-radius:5px;font-size:10px;cursor:pointer;font-family:inherit}
+.chip .mv button.on{background:var(--bone);color:var(--ink);border-color:var(--bone)}
+.chip .mv button.x:hover{color:var(--red);border-color:var(--red)}
+.tray{margin-top:13px;border:1px dashed var(--line);border-radius:10px;padding:11px;min-height:50px}
+.tray .lab{font-size:10px;color:var(--faint);letter-spacing:.16em;text-transform:uppercase;margin-bottom:8px}
+.tray .chips{display:flex;flex-wrap:wrap;gap:8px}.tray .chip{width:auto;margin:0}
+.status{font-size:11.5px;margin-top:13px;padding:9px 12px;border-radius:8px;border:1px solid var(--line)}
+.status.ok{color:#9DBBD8;border-color:var(--slate-d);background:rgba(94,130,166,.08)}
+.status.warn{color:var(--amber);border-color:var(--amber-d);background:rgba(255,179,71,.07)}
+.status.err{color:var(--red);border-color:rgba(255,92,122,.4);background:rgba(255,92,122,.07)}
+
+/* capture */
+.srv{display:flex;align-items:center;gap:9px;font-size:11.5px;color:var(--mute);margin-bottom:14px}
+.dotc{width:9px;height:9px;border-radius:50%;background:var(--faint);flex:0 0 auto}
+.dotc.up{background:var(--teal);box-shadow:0 0 7px var(--teal)} .dotc.down{background:var(--red)}
+.live{display:inline-flex;align-items:center;gap:9px;font-family:"Space Grotesk";font-weight:600;color:var(--amber)}
+.live .pulse{width:11px;height:11px;border-radius:50%;background:var(--red);animation:pulse 1.1s infinite}
+@keyframes pulse{0%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}100%{opacity:1;transform:scale(1)}}
+.elapsed{font-family:"Space Grotesk";font-size:26px;font-weight:700;color:var(--bone)}
+.csvbox{border:1px solid var(--line);border-radius:12px;background:var(--panel2);overflow:hidden}
+.csvbox .top{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;border-bottom:1px solid var(--line)}
+.csvbox .fn{font-family:"Space Grotesk";font-weight:600;font-size:12.5px;color:var(--bone)}
+.csvbox .rows{font-size:11px;color:var(--mute)}
+.csvbox pre{margin:0;max-height:240px;overflow:auto;padding:12px 14px;font-size:10.5px;line-height:1.5;color:#cdd6df;background:#0b1018;white-space:pre}
+.codePanel{border:1px solid var(--line);border-radius:12px;margin-bottom:12px;overflow:hidden;background:var(--panel2)}
+.codePanel .bar{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;cursor:pointer}
+.codePanel .bar .t{display:flex;align-items:center;gap:11px}
+.codePanel .bar .fn{font-family:"Space Grotesk";font-weight:600;font-size:12.5px;color:var(--bone)}
+.codePanel .bar .lbl{font-size:11px;color:var(--mute)}
+.codePanel .chev{color:var(--faint);transition:transform .2s;font-size:12px}
+.codePanel.open .chev{transform:rotate(90deg)}
+.codePanel .body{display:none;border-top:1px solid var(--line)}.codePanel.open .body{display:block}
+.codePanel pre{margin:0;max-height:340px;overflow:auto;padding:13px;font-size:10.6px;line-height:1.5;color:#cdd6df;background:#0b1018;white-space:pre}
+.codePanel .acts{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--line)}
+ol.steps{counter-reset:s;list-style:none;padding:0;margin:0}
+ol.steps li{position:relative;padding:9px 0 9px 36px;font-size:12.5px;color:var(--bone);border-bottom:1px solid var(--line)}
+ol.steps li:last-child{border-bottom:0}
+ol.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:8px;width:23px;height:23px;border-radius:50%;border:1px solid var(--amber-d);color:var(--amber);font-size:11px;display:flex;align-items:center;justify-content:center;font-family:"Space Grotesk"}
+code,kbd{background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:var(--bone);font-size:11px}
+
+/* analyse controls */
+.controls{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-end;margin-top:6px}
+.fgroup{display:flex;flex-direction:column;gap:6px}
+.fgroup .cap{margin-bottom:1px}
+.fline{display:flex;align-items:center;gap:8px}
+.fline input[type=number]{width:64px;background:var(--ink);border:1px solid var(--line);border-radius:7px;color:var(--bone);font-family:inherit;font-size:12.5px;padding:6px 8px}
+.fline select{background:var(--ink);border:1px solid var(--line);border-radius:7px;color:var(--bone);font-family:inherit;font-size:12.5px;padding:6px 8px}
+.toggle{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--mute);cursor:pointer;user-select:none}
+.toggle input{accent-color:var(--amber)}
+
+.verdict{border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:16px;background:var(--panel)}
+.verdict.detected{border-color:var(--amber-d);background:linear-gradient(180deg,rgba(255,179,71,.08),rgba(255,179,71,.02))}
+.verdict.clear{border-color:var(--slate-d);background:rgba(94,130,166,.07)}
+.verdict .vh{display:flex;align-items:center;gap:10px}
+.verdict .vh .big{font-family:"Space Grotesk";font-weight:700;font-size:20px;letter-spacing:-.01em}
+.verdict .vh .big.amber{color:var(--amber)} .verdict .vh .big.slate{color:#9DBBD8}
+.verdict .sub{font-size:11.5px;color:var(--mute);margin-top:6px;max-width:84ch}
+.qc{font-size:11px;margin-top:10px;padding:7px 11px;border-radius:8px;border:1px dashed var(--line);color:var(--mute)}
+.qc.bad{border-color:var(--amber-d);color:var(--amber)}
+
+.sig{border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,var(--panel),var(--panel2));padding:16px 16px 10px;margin-bottom:16px}
+.sig .sigh{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.sig h2{font-family:"Space Grotesk";font-size:13.5px;letter-spacing:.03em;text-transform:uppercase;margin:0;color:var(--bone);font-weight:600}
+.legend{display:flex;gap:14px;font-size:10.5px;color:var(--mute);flex-wrap:wrap;align-items:center;margin:6px 0}
+.legend i{display:inline-block;width:11px;height:3px;border-radius:2px;margin-right:5px;vertical-align:2px}
+.chsel{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-left:auto}
+.chsel button{background:transparent;border:0;border-right:1px solid var(--line);color:var(--mute);font-family:inherit;font-size:11.5px;padding:5px 11px;cursor:pointer}
+.chsel button:last-child{border-right:0}.chsel button.on{background:var(--slate);color:#06121d;font-weight:600}
+.chartbox{width:100%;overflow-x:auto}
+svg.viz{display:block;width:100%;height:auto;font-family:"IBM Plex Mono",monospace}
+
+.ptable{margin-top:4px;font-size:12px}
+.ptable table{border-collapse:collapse;width:100%}
+.ptable td,.ptable th{border:1px solid var(--line);padding:7px 11px;text-align:left}
+.ptable th{color:var(--faint);font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:600}
+.ptable .sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:7px;vertical-align:-1px}
+.ptable .num{font-family:"Space Grotesk";font-weight:600;color:var(--bone)}
+.ptable tr.pool td{background:rgba(255,210,122,.06)}
+
+.foot{margin-top:24px;border-top:1px solid var(--line);padding-top:15px;font-size:11px;color:var(--faint);max-width:90ch}
+.empty{font-size:12px;color:var(--faint);text-align:center;padding:30px}
+@media (max-width:880px){.cats{grid-template-columns:1fr}.controls{gap:14px}h1{font-size:24px}}
+:focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:4px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+[data-en]{display:none} body.en [data-de]{display:none} body.en [data-en]{display:inline}
+
+/* ===== stimulus preview player ===== */
+.preview-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:17px;margin-top:14px}
+.preview-card h2{font-family:"Space Grotesk",sans-serif;font-size:13px;letter-spacing:.04em;margin:0 0 3px;color:var(--bone);font-weight:600;text-transform:uppercase}
+.preview-card .desc{font-size:11.5px;color:var(--mute);margin:0 0 13px;max-width:80ch}
+.stage-wrap{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;margin-bottom:12px}
+.stage{width:340px;height:240px;background:#000;border-radius:12px;border:1px solid var(--line);flex:0 0 auto;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.stage img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+.stage-badge{position:absolute;top:8px;left:8px;font-family:"Space Grotesk",sans-serif;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;letter-spacing:.06em;text-transform:uppercase}
+.stage-badge.probe{background:rgba(255,92,122,.9);color:#fff}
+.stage-badge.target{background:rgba(91,209,122,.9);color:#111}
+.stage-badge.irrelevant{background:rgba(133,147,161,.5);color:#ddd}
+.stage-badge.isi{background:rgba(255,179,71,.15);color:var(--amber)}
+.stage-empty{font-size:11.5px;color:var(--faint);text-align:center;padding:0 18px}
+.seq-info{flex:1;min-width:200px;display:flex;flex-direction:column;gap:9px}
+.seq-row{display:flex;justify-content:space-between;font-size:11.5px;color:var(--mute)}
+.seq-row b{color:var(--bone);font-family:"Space Grotesk",sans-serif;font-size:13px;font-weight:600}
+.seq-bar-wrap{margin-top:4px}
+.seq-bar-bg{height:4px;background:var(--line);border-radius:3px;overflow:hidden}
+.seq-bar-fill{height:100%;background:var(--amber);border-radius:3px;width:0%;transition:width .15s linear}
+.seq-strip{display:flex;gap:3px;flex-wrap:wrap;margin-top:10px;max-height:76px;overflow:hidden}
+.sq{width:14px;height:14px;border-radius:3px;flex:0 0 auto;opacity:.35}
+.sq.done{opacity:1} .sq.cur{outline:2px solid #fff;outline-offset:1px;opacity:1}
+.sq.probe{background:var(--c-p1)} .sq.target{background:var(--c-tgt)} .sq.irrelevant{background:var(--c-irr)}
+.prev-controls{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.speed-seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.speed-seg button{background:transparent;border:0;border-right:1px solid var(--line);color:var(--mute);font-family:inherit;font-size:11px;padding:6px 11px;cursor:pointer}
+.speed-seg button:last-child{border-right:0}.speed-seg button.on{background:var(--slate);color:#06121d;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="head">
+    <div>
+      <div class="eyebrow">Concealed Information Test · P300</div>
+      <h1 class="disp"><span data-de>P300-Lügendetektion</span><span data-en>P300 lie detection</span> <span class="sub">Unicorn Hybrid Black · 8 ch · 250 Hz</span></h1>
+      <p class="lede"><span data-de>Bilder hochladen, EEG aufnehmen, P300 an den markierten Reizen auswerten — Sonde gegen Irrelevant und Ziel.</span><span data-en>Upload images, record EEG, evaluate the P300 at the marked stimuli — probe versus irrelevant and target.</span></p>
+    </div>
+    <div class="lang" role="group" aria-label="Sprache"><button id="de" class="on" onclick="setLang('de')">DE</button><button id="en" onclick="setLang('en')">EN</button></div>
+  </header>
+
+  <div class="banner">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+    <div><span data-de>Die Aufnahme läuft über den lokalen Helfer <b>cit_server.py</b> (der Browser kann selbst kein LSL/Python). Starte ihn und öffne diese Seite über ihn. Forschungs-Demo — P300-basierte Täuschungserkennung ist forensisch umstritten.</span><span data-en>Recording runs via the local helper <b>cit_server.py</b> (the browser itself cannot do LSL/Python). Start it and open this page through it. Research demo — P300-based deception detection is forensically contested.</span></div>
+  </div>
+
+  <nav class="tabs" role="tablist">
+    <button class="on" id="tab-images" onclick="showTab('images')"><span class="n">1</span><span data-de>Bilder</span><span data-en>Images</span></button>
+    <button id="tab-capture" onclick="showTab('capture')"><span class="n">2</span><span data-de>Daten aufnehmen</span><span data-en>Capture data</span></button>
+    <button id="tab-analyse" onclick="showTab('analyse')"><span class="n">3</span><span data-de>Analyse</span><span data-en>Analysis</span></button>
+  </nav>
+
+  <!-- ===== TAB 1: IMAGES ===== -->
+  <section class="pane on" id="pane-images">
+    <div class="card">
+      <h2 class="disp"><span data-de>Bilder hochladen &amp; zuordnen</span><span data-en>Upload &amp; assign images</span></h2>
+      <p class="desc"><span data-de>Lade die Bilder und ordne jedes einer Kategorie zu: tatbezogen (Sonden, Codes 100/101/102), ein Zielbild (Code 3, Positivkontrolle), Rest irrelevant (Code 1). Bilder bleiben lokal.</span><span data-en>Upload the images and assign each: crime-related (probes, codes 100/101/102), one target (code 3, positive control), the rest irrelevant (code 1). Images stay local.</span></p>
+      <div class="uploader" id="uploader">
+        <div class="big"><span data-de>Bilder auswählen oder hierher ziehen</span><span data-en>Choose images or drag them here</span></div>
+        <p>JPG · PNG · BMP</p>
+        <input type="file" id="fileImg" accept="image/*" multiple hidden>
+      </div>
+      <div class="tray" id="tray"><div class="lab"><span data-de>Nicht zugeordnet</span><span data-en>Unassigned</span></div><div class="chips" id="trayChips"></div></div>
+      <div class="cats">
+        <div class="cat probe"><h3><span><span data-de>Tatbezogen (Sonden)</span><span data-en>Crime-related (probes)</span></span><span class="ct" id="ct-probe">0</span></h3><div class="hint"><span data-de>Codes 100, 101, 102</span><span data-en>codes 100, 101, 102</span></div><div id="list-probe"></div></div>
+        <div class="cat irrelevant"><h3><span>Irrelevant</span><span class="ct" id="ct-irrelevant">0</span></h3><div class="hint"><span data-de>Code 1 · ≥ 3 empfohlen</span><span data-en>code 1 · ≥ 3 recommended</span></div><div id="list-irrelevant"></div></div>
+        <div class="cat target"><h3><span><span data-de>Ziel (genau 1)</span><span data-en>Target (exactly 1)</span></span><span class="ct" id="ct-target">0</span></h3><div class="hint"><span data-de>Code 3 · Positivkontrolle</span><span data-en>code 3 · positive control</span></div><div id="list-target"></div></div>
+      </div>
+      <div id="imgStatus" class="status warn"></div>
+    </div>
+
+    <!-- ===== stimulus preview player ===== -->
+    <div class="preview-card" id="previewCard">
+      <h2 class="disp"><span data-de>Reizvorschau (Film für die Testperson)</span><span data-en>Stimulus preview (film for the subject)</span></h2>
+      <p class="desc"><span data-de>Simuliert die genaue Bildsequenz und -dauer des Experiments. Zeige diesen Tab der Testperson während der Aufnahme in Tab 2 — oder nutze den separaten Vollbild-Modus.</span><span data-en>Simulates the exact image sequence and timing of the experiment. Show this tab to the subject during recording in tab 2 — or use separate fullscreen mode.</span></p>
+      <div class="stage-wrap">
+        <div class="stage" id="stage">
+          <div class="stage-empty" id="stageEmpty"><span data-de>Bilder zuordnen, dann Vorschau starten</span><span data-en>Assign images, then start preview</span></div>
+        </div>
+        <div class="seq-info">
+          <div class="seq-row"><span><span data-de>Block</span><span data-en>Block</span></span><b id="seqBlock">—</b></div>
+          <div class="seq-row"><span><span data-de>Reiz</span><span data-en>Stimulus</span></span><b id="seqStim">—</b></div>
+          <div class="seq-row"><span><span data-de>Verbleibend</span><span data-en>Remaining</span></span><b id="seqLeft">—</b></div>
+          <div class="seq-bar-wrap"><div class="seq-bar-bg"><div class="seq-bar-fill" id="seqBar"></div></div></div>
+          <div class="seq-strip" id="seqStrip"></div>
+        </div>
+      </div>
+      <div class="prev-controls">
+        <button class="btn primary" id="btnPreview" onclick="startPreview()">
+          <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+          <span data-de>Vorschau starten</span><span data-en>Start preview</span>
+        </button>
+        <button class="btn danger" id="btnPreviewStop" onclick="stopPreview()" style="display:none">
+          <svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
+          <span data-de>Stopp</span><span data-en>Stop</span>
+        </button>
+        <button class="btn" id="btnFullscreen" onclick="openFullscreen()" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+          <span data-de>Vollbild</span><span data-en>Fullscreen</span>
+        </button>
+        <div class="speed-seg" id="speedSeg">
+          <button class="on" onclick="setSpeed(1,this)"><span data-de>Echt</span><span data-en>Real</span></button>
+          <button onclick="setSpeed(3,this)">3×</button>
+          <button onclick="setSpeed(8,this)">8×</button>
+        </div>
+        <span id="previewStatus" style="font-size:11.5px;color:var(--faint)"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TAB 2: CAPTURE ===== -->
+  <section class="pane" id="pane-capture">
+    <div class="card">
+      <h2 class="disp"><span data-de>EEG aufnehmen</span><span data-en>Capture EEG</span></h2>
+      <div class="srv"><span class="dotc" id="srvDot"></span><span id="srvText"><span data-de>Server-Status wird geprüft …</span><span data-en>checking server status …</span></span></div>
+      <p class="desc"><span data-de>Der Knopf startet im Hintergrund <code>lie_multiple_markers.py</code> (Reizpräsentation, erzeugt den Marker-Stream) und <code>capture_lie.py</code> (Aufnahme von Unicorn + Markern). „Stopp" beendet beide und schreibt die CSV.</span><span data-en>The button starts <code>lie_multiple_markers.py</code> (presentation, creates the marker stream) and <code>capture_lie.py</code> (records Unicorn + markers) in the background. "Stop" ends both and writes the CSV.</span></p>
+      <div class="row" style="margin-bottom:6px">
+        <label class="toggle" style="gap:8px"><span data-de>Subjekt-ID</span><span data-en>subject ID</span> <input type="number" id="subjId" value="1" min="1" max="99" style="width:64px;background:var(--ink);border:1px solid var(--line);border-radius:7px;color:var(--bone);font-family:inherit;font-size:12.5px;padding:6px 8px"></label>
+      </div>
+      <div class="row" id="capControls">
+        <button class="btn primary" id="btnStart" onclick="startCapture()"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg><span data-de>EEG aufnehmen</span><span data-en>Capture EEG</span></button>
+        <button class="btn danger" id="btnStop" onclick="stopCapture()" style="display:none"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="1"/></svg><span data-de>Stopp</span><span data-en>Stop</span></button>
+        <span class="live" id="liveInd" style="display:none"><span class="pulse"></span><span data-de>Aufnahme läuft</span><span data-en>recording</span> · <span class="elapsed" id="elapsed" style="font-size:16px">0:00</span></span>
+      </div>
+      <div id="capMsg" class="status" style="display:none"></div>
+      <div id="csvResult" style="margin-top:14px;display:none">
+        <div class="csvbox">
+          <div class="top"><span class="fn" id="csvName">–</span><span class="rows" id="csvRows"></span></div>
+          <pre id="csvPreview"></pre>
+        </div>
+        <div class="row" style="margin-top:11px">
+          <button class="btn" onclick="downloadCaptured()"><span data-de>CSV herunterladen</span><span data-en>Download CSV</span></button>
+          <button class="btn tealb" onclick="useInAnalysis()"><span data-de>In Analyse verwenden →</span><span data-en>Use in analysis →</span></button>
+        </div>
+      </div>
+    </div>
+    <div class="codePanel" id="cpwrap">
+      <div class="bar" onclick="document.getElementById('cpwrap').classList.toggle('open')"><div class="t"><span class="chev">▶</span><span class="fn"><span data-de>Hintergrund-Skripte (Python)</span><span data-en>Background scripts (Python)</span></span></div><span class="cap">capture_lie · presentation · utils</span></div>
+      <div class="body" id="codePanels" style="padding:12px"></div>
+    </div>
+  </section>
+
+  <!-- ===== TAB 3: ANALYSE ===== -->
+  <section class="pane" id="pane-analyse">
+    <div class="card">
+      <h2 class="disp"><span data-de>Daten &amp; Filter</span><span data-en>Data &amp; filters</span></h2>
+      <p class="desc"><span data-de>Es wird die aufgenommene CSV verwendet (oder lade eine, oder nutze ein Demo). Vorverarbeitung wie in <code>visualiser.py</code>: optionaler Notch-Filter und Bandpass, dann Epochen −0,2…+0,8 s um jeden Marker, Baseline −0,2…0 s, P300-Fenster 0,25–0,50 s.</span><span data-en>Uses the recorded CSV (or upload one, or use a demo). Preprocessing as in <code>visualiser.py</code>: optional notch and band-pass, then epochs −0.2…+0.8 s around each marker, baseline −0.2…0 s, P300 window 0.25–0.50 s.</span></p>
+      <div class="drop" id="drop" style="padding:16px"><div class="big"><span data-de>CSV auswählen oder hierher ziehen</span><span data-en>Choose CSV or drag here</span></div><input type="file" id="fileCsv" accept=".csv,text/csv" hidden></div>
+      <div class="row" style="margin-top:11px">
+        <span class="cap" id="srcLabel"><span data-de>Quelle:</span><span data-en>source:</span> <b style="color:var(--mute)" id="srcName">–</b></span>
+        <span class="cap" style="margin-left:8px"><span data-de>oder Demo:</span><span data-en>or demo:</span></span>
+        <button class="btn" onclick="useDemo('guilty')"><span data-de>Schuldig</span><span data-en>Guilty</span></button>
+        <button class="btn" onclick="useDemo('innocent')"><span data-de>Unschuldig</span><span data-en>Innocent</span></button>
+      </div>
+      <div class="controls">
+        <div class="fgroup"><span class="cap">Notch</span><div class="fline"><label class="toggle"><input type="checkbox" id="notchOn" checked> <span data-de>an</span><span data-en>on</span></label><select id="notchFreq"><option value="50" selected>50 Hz</option><option value="60">60 Hz</option></select></div></div>
+        <div class="fgroup"><span class="cap">Bandpass</span><div class="fline"><label class="toggle"><input type="checkbox" id="bpOn" checked> <span data-de>an</span><span data-en>on</span></label><input type="number" id="bpLo" value="1" min="0.1" step="0.1"><span style="color:var(--faint)">–</span><input type="number" id="bpHi" value="30" min="1" step="1"><span style="color:var(--faint);font-size:11px">Hz</span></div></div>
+        <div class="fgroup"><span class="cap"><span data-de>Artefakt-Ablehnung</span><span data-en>artifact reject</span></span><div class="fline"><label class="toggle"><input type="checkbox" id="rejOn" checked> <span data-de>p2p</span><span data-en>p2p</span></label><input type="number" id="rejUv" value="150" min="10" step="10"><span style="color:var(--faint);font-size:11px"><span data-de>Einh.</span><span data-en>units</span></span></div></div>
+        <button class="btn primary" onclick="runAnalysis()"><span data-de>Analysieren</span><span data-en>Analyse</span></button>
+      </div>
+      <div id="anaMsg" class="status" style="display:none"></div>
+    </div>
+
+    <div id="results" style="display:none">
+      <div class="verdict" id="verdict"></div>
+      <div class="sig">
+        <div class="sigh"><h2 class="disp"><span data-de>ERP um die Reize</span><span data-en>ERP around stimuli</span></h2>
+          <div class="chsel" id="chsel"><button class="on" onclick="setCh('Pz')">Pz</button><button onclick="setCh('Cz')">Cz</button></div></div>
+        <div class="legend" id="legend"></div>
+        <div class="chartbox"><div id="erpOverlay"></div></div>
+      </div>
+      <div class="sig">
+        <h2 class="disp" style="margin-bottom:6px"><span data-de>Alle 8 Kanäle</span><span data-en>All 8 channels</span></h2>
+        <div class="legend" id="legend2"></div>
+        <div class="chartbox"><div id="erpAll"></div></div>
+      </div>
+      <div class="card">
+        <h2 class="disp"><span data-de>P300-Amplitude am Pz (Fenster 0,25–0,50 s)</span><span data-en>P300 amplitude at Pz (window 0.25–0.50 s)</span></h2>
+        <div class="ptable" id="ptable"></div>
+        <div class="row" style="margin-top:13px"><button class="btn" onclick="dlERP()"><span data-de>ERP-Mittelwerte (.csv)</span><span data-en>ERP averages (.csv)</span></button></div>
+      </div>
+    </div>
+    <div id="emptyAnalyse" class="empty"><span data-de>Noch keine Daten. Nimm auf, lade eine CSV oder starte ein Demo.</span><span data-en>No data yet. Record, load a CSV, or start a demo.</span></div>
+  </section>
+
+  <div class="foot"><span data-de>Amplituden in den nativen CSV-Einheiten (nicht kalibrierte µV), außer die Aufnahme war bereits skaliert. Reine ERP-Auswertung um die Marker — keine weiteren Tests.</span><span data-en>Amplitudes in the CSV's native units (not calibrated µV) unless the recording was already scaled. Pure ERP analysis around the markers — no further tests.</span></div>
+</div>
+<script>
+"use strict";
+/* ===== tested ERP/P300 engine (verified in node) ===== */
+// ============================================================
+// ERP / P300 core — mirrors visualiser.py. Pure JS (node + browser).
+// ============================================================
+const CHANNELS=["Fz","C3","Cz","C4","Pz","PO7","Oz","PO8"];
+const EVENT_ID={irrelevant:1, target:3, probe_1:100, probe_2:101, probe_3:102};
+const P300_WIN=[0.25,0.50];
+
+function fft(re,im){const n=re.length;for(let i=1,j=0;i<n;i++){let b=n>>1;for(;j&b;b>>=1)j^=b;j^=b;if(i<j){[re[i],re[j]]=[re[j],re[i]];[im[i],im[j]]=[im[j],im[i]];}}for(let len=2;len<=n;len<<=1){const a=-2*Math.PI/len,wr=Math.cos(a),wi=Math.sin(a);for(let i=0;i<n;i+=len){let cr=1,ci=0;for(let k=0;k<len/2;k++){const ur=re[i+k],ui=im[i+k];const vr=re[i+k+len/2]*cr-im[i+k+len/2]*ci,vi=re[i+k+len/2]*ci+im[i+k+len/2]*cr;re[i+k]=ur+vr;im[i+k]=ui+vi;re[i+k+len/2]=ur-vr;im[i+k+len/2]=ui-vi;const ncr=cr*wr-ci*wi;ci=cr*wi+ci*wr;cr=ncr;}}}}
+function nextpow2(n){let p=1;while(p<n)p<<=1;return p;}
+function fftFilter(x, fs, keep){ // keep(f)->bool
+  const n=x.length,N=nextpow2(n);const re=new Float64Array(N),im=new Float64Array(N);
+  for(let i=0;i<n;i++)re[i]=x[i];
+  fft(re,im);
+  for(let k=0;k<N;k++){const f=(k<=N/2?k:k-N)*fs/N;if(!keep(Math.abs(f))){re[k]=0;im[k]=0;}}
+  for(let k=0;k<N;k++)im[k]=-im[k];
+  fft(re,im);
+  const out=new Float64Array(n);for(let i=0;i<n;i++)out[i]=re[i]/N;return out;
+}
+const bandpass=(x,fs,lo,hi)=>fftFilter(x,fs,f=>f>=lo&&f<=hi);
+const notch=(x,fs,f0,bw)=>fftFilter(x,fs,f=>!(f>=f0-bw&&f<=f0+bw));
+
+function parseCSV(text){
+  const lines=text.split(/\r?\n/).filter(l=>l.length);
+  const h=lines[0].split(",").map(s=>s.trim().toLowerCase());const ci={};h.forEach((x,i)=>ci[x]=i);
+  if(!("stimulus" in ci)) throw new Error("CSV hat keine 'stimulus'-Spalte.");
+  const cc=["ch1","ch2","ch3","ch4","ch5","ch6","ch7","ch8"].map(c=>ci[c]);
+  if(cc.some(v=>v===undefined)) throw new Error("CSV fehlen ch1..ch8.");
+  const n=lines.length-1;const ch=Array.from({length:8},()=>new Float64Array(n));const stim=new Int32Array(n);
+  for(let r=0;r<n;r++){const p=lines[r+1].split(",");for(let c=0;c<8;c++)ch[c][r]=parseFloat(p[cc[c]]);stim[r]=parseInt(p[ci.stimulus],10)||0;}
+  return {ch,stim,n};
+}
+
+function analyzeERP(csv, opts={}){
+  const fs=opts.fs||250;
+  const tmin=opts.tmin!==undefined?opts.tmin:-0.2, tmax=opts.tmax!==undefined?opts.tmax:0.8;
+  const {ch,stim,n}=parseCSV(csv);
+  // preprocessing on whole channels: notch then bandpass (like visualiser)
+  let data=ch.map(c=>Float64Array.from(c));
+  if(opts.notch) data=data.map(c=>notch(c,fs,opts.notchFreq||50,opts.notchBw||1.5));
+  if(opts.bandpass) data=data.map(c=>bandpass(c,fs,opts.lo||1,opts.hi||30));
+  // epoching by sample index
+  const PRE=Math.round(-tmin*fs), POST=Math.round(tmax*fs), L=PRE+POST+1, T0=PRE;
+  const times=Array.from({length:L},(_,i)=>(i-T0)/fs);
+  const codeToLabel={}; for(const k in EVENT_ID) codeToLabel[EVENT_ID[k]]=k;
+  const ep={}; for(const k in EVENT_ID) ep[k]=[];
+  const reject=opts.reject? (opts.rejectUv||150):null;
+  let nRej=0;
+  for(let i=0;i<n;i++){
+    const code=stim[i]; if(!code) continue; const label=codeToLabel[code]; if(!label) continue;
+    if(i-PRE<0||i+POST>=n) continue;
+    const e=Array.from({length:8},()=>new Float64Array(L));
+    for(let c=0;c<8;c++){ let b=0; for(let s=0;s<=T0;s++) b+=data[c][i-PRE+s]; b/=(T0+1);
+      for(let s=0;s<L;s++) e[c][s]=data[c][i-PRE+s]-b; }
+    if(reject){ let bad=false; for(let c=0;c<8&&!bad;c++){ let mn=1e9,mx=-1e9; for(let s=0;s<L;s++){const v=e[c][s]; if(v<mn)mn=v; if(v>mx)mx=v;} if(mx-mn>reject) bad=true; } if(bad){ nRej++; continue; } }
+    ep[label].push(e);
+  }
+  const present=Object.keys(EVENT_ID).filter(k=>ep[k].length>0);
+  const idx=name=>CHANNELS.indexOf(name);
+  const avg=(eps,ci)=>{ const o=new Float64Array(L); for(const e of eps) for(let s=0;s<L;s++) o[s]+=e[ci][s]; for(let s=0;s<L;s++) o[s]/=eps.length; return o; };
+  const traces={Pz:{},Cz:{},all:{}}; CHANNELS.forEach(c=>traces.all[c]={});
+  present.forEach(lab=>{ traces.Pz[lab]=Array.from(avg(ep[lab],idx("Pz"))).map(v=>+v.toFixed(3));
+    traces.Cz[lab]=Array.from(avg(ep[lab],idx("Cz"))).map(v=>+v.toFixed(3));
+    CHANNELS.forEach(c=>traces.all[c][lab]=Array.from(avg(ep[lab],idx(c))).map(v=>+v.toFixed(3))); });
+  // P300 window mean at Pz, per condition
+  const a=T0+Math.round(P300_WIN[0]*fs), b=T0+Math.round(P300_WIN[1]*fs);
+  const p300={}; const counts={};
+  present.forEach(lab=>{ const tr=traces.Pz[lab]; let s=0; for(let i=a;i<=b;i++) s+=tr[i]; p300[lab]={mean:+(s/(b-a+1)).toFixed(3), n:ep[lab].length}; counts[lab]=ep[lab].length; });
+  // pooled probe condition (all probe codes) -- robust recognition signal
+  const probeLabels=present.filter(l=>l.startsWith("probe"));
+  const probeAll=[].concat(...probeLabels.map(l=>ep[l]));
+  const epMean=(eps)=>eps.map(e=>{ let s=0; for(let i=a;i<=b;i++) s+=e[idx("Pz")][i]; return s/(b-a+1); });
+  if(probeAll.length){ const tr=avg(probeAll,idx("Pz")); let s=0; for(let i=a;i<=b;i++) s+=tr[i]; p300["probe"]={mean:+(s/(b-a+1)).toFixed(3), n:probeAll.length, pooled:true};
+    traces.Pz.probe=Array.from(tr).map(v=>+v.toFixed(3)); traces.Cz.probe=Array.from(avg(probeAll,idx("Cz"))).map(v=>+v.toFixed(3));
+    CHANNELS.forEach(c=>traces.all[c].probe=Array.from(avg(probeAll,idx(c))).map(v=>+v.toFixed(3))); }
+  // ── RNG (deterministic, sufficient entropy for bootstrap) ──────────────────
+  let seed=777;
+  const rnd=()=>{seed=(seed*1103515245+12345)&0x7fffffff;return seed/0x7fffffff;};
+  const rndInt=n=>Math.floor(rnd()*n);
+
+  // ── BAD — Bootstrapped Amplitude Difference (10 000 iterations) ─────────
+  // Literature: Farwell & Donchin 1991; Rosenfeld 2011.
+  // Iteration count follows the precision study recommendation (≥10 000 to
+  // keep instability ≤1–4 % of decisions).  Fast: ~50 ms in-browser.
+  function bootBAD(va, vb, B=10000){
+    const na=va.length, nb=vb.length;
+    const ma=va.reduce((s,x)=>s+x,0)/na, mb=vb.reduce((s,x)=>s+x,0)/nb;
+    let tail=0;
+    for(let k=0;k<B;k++){
+      let sa=0; for(let i=0;i<na;i++) sa+=va[rndInt(na)];
+      let sb=0; for(let i=0;i<nb;i++) sb+=vb[rndInt(nb)];
+      if(sa/na - sb/nb <= 0) tail++;
+    }
+    // Precision: run a second 10 k pass and report if decisions match
+    let tail2=0;
+    for(let k=0;k<B;k++){
+      let sa=0; for(let i=0;i<na;i++) sa+=va[rndInt(na)];
+      let sb=0; for(let i=0;i<nb;i++) sb+=vb[rndInt(nb)];
+      if(sa/na - sb/nb <= 0) tail2++;
+    }
+    const p1=tail/B, p2=tail2/B;
+    const stable=Math.abs(p1-p2)<0.03; // ≤3 pp variation across runs
+    return {diff:ma-mb, p:+(p1*0.5+p2*0.5).toFixed(4), stable};
+  }
+
+  // ── Pearson correlation helper ───────────────────────────────────────────
+  function corr(u, v){
+    const n=u.length; let mu=0,mv=0;
+    for(let i=0;i<n;i++){mu+=u[i];mv+=v[i];} mu/=n; mv/=n;
+    let num=0,du=0,dv=0;
+    for(let i=0;i<n;i++){const a=u[i]-mu,b=v[i]-mv;num+=a*b;du+=a*a;dv+=b*b;}
+    return num/(Math.sqrt(du*dv)||1e-12);
+  }
+
+  // ── BCD — Bootstrapped Correlation Difference (secondary method) ─────────
+  // Classifies by whether the probe waveform shape correlates more with the
+  // target template than the irrelevant template (Farwell-style pattern
+  // recognition; reported alongside BAD, not replacing it).
+  // NOTE: with n_probe < ~30 this method is noisier than BAD and should be
+  // treated as a supporting indicator, not a primary verdict.
+  function bootBCD(probeEps, tgtEps, irrEps, B=10000){
+    const ci=idx("Pz");
+    // Fixed population-mean templates (not resampled) for stability
+    const tgtTmpl=avg(tgtEps,ci), irrTmpl=avg(irrEps,ci);
+    const np=probeEps.length;
+    // Point estimate: does the average probe correlate more with target?
+    const probeAvg=avg(probeEps,ci);
+    const rPT=corr(probeAvg,tgtTmpl), rPI=corr(probeAvg,irrTmpl);
+    const pointAgrees=(rPT>rPI);
+    // Bootstrap: resample probe trials, keep templates fixed
+    let match=0;
+    for(let k=0;k<B;k++){
+      const re=new Float64Array(L); // resampled probe average
+      for(let t=0;t<np;t++){const e=probeEps[rndInt(np)]; for(let s=0;s<L;s++) re[s]+=e[ci][s];}
+      for(let s=0;s<L;s++) re[s]/=np;
+      if(corr(re,tgtTmpl)>corr(re,irrTmpl)) match++;
+    }
+    const p=match/B; // proportion of bootstrap draws where probe ~ target
+    return {rPT:+rPT.toFixed(3), rPI:+rPI.toFixed(3), p:+p.toFixed(4), detected:(p>0.5), pointAgrees};
+  }
+
+  const irrEpMean = present.includes("irrelevant")? epMean(ep.irrelevant):null;
+  const irrBase   = irrEpMean? irrEpMean.reduce((x,y)=>x+y,0)/irrEpMean.length : null;
+
+  // per-probe table rows
+  const perProbe=probeLabels.map(lab=>{
+    let res={label:lab, mean:p300[lab].mean, n:counts[lab]};
+    if(irrEpMean){ const r=bootBAD(epMean(ep[lab]), irrEpMean); res.deltaVsIrr=+r.diff.toFixed(3); res.p=+r.p.toFixed(3); res.stable=r.stable; }
+    return res;
+  });
+
+  // pooled recognition — BAD primary verdict
+  let recognition=null;
+  if(probeAll.length && irrEpMean){
+    const r=bootBAD(epMean(probeAll), irrEpMean);
+    recognition={mean:p300["probe"].mean, deltaVsIrr:+r.diff.toFixed(3), p:+r.p.toFixed(3), n:probeAll.length, detected:(r.diff>0 && r.p<0.05), stable:r.stable};
+  }
+
+  // BCD secondary (only when we have all three conditions with ≥3 epochs each)
+  let bcd=null;
+  if(probeAll.length>=3 && ep.target&&ep.target.length>=3 && ep.irrelevant&&ep.irrelevant.length>=3){
+    try{ bcd=bootBCD(probeAll, ep.target, ep.irrelevant); }catch(e){ bcd=null; }
+  }
+  const tgtMean = present.includes("target")? p300["target"].mean:null;
+  const targetOK = (tgtMean!==null && irrBase!==null) ? (tgtMean - irrBase > 0) : null;
+  return {fs, times, traces, p300, counts, present, perProbe, recognition, bcd, targetOK, irrBase, p300Window:P300_WIN, nRejected:nRej};
+}
+
+// ---- synthetic demo (for UI without hardware) ----
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function g1(r){let u=0,v=0;while(!u)u=r();while(!v)v=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function pink(n,r){const N=nextpow2(n);const re=new Float64Array(N),im=new Float64Array(N);for(let i=0;i<N;i++)re[i]=g1(r);fft(re,im);for(let k=1;k<N;k++){const kk=(k<=N/2?k:N-k);const s=1/Math.sqrt(kk);re[k]*=s;im[k]*=s;}re[0]=0;im[0]=0;for(let k=0;k<N;k++)im[k]=-im[k];fft(re,im);const o=new Float64Array(n);let m=0;for(let i=0;i<n;i++){o[i]=re[i]/N;m+=o[i];}m/=n;let sd=0;for(let i=0;i<n;i++){o[i]-=m;sd+=o[i]*o[i];}sd=Math.sqrt(sd/n)+1e-9;for(let i=0;i<n;i++)o[i]=6*o[i]/sd;return o;}
+function synthCSV(profile, nBlocks=20){
+  const FS=250,r=mulberry32(profile==="guilty"?7:5),N_IRR=5,TRIAL=Math.round(2.5*FS),LEAD=FS;
+  const plan=[],pc=[100,101,102];for(let b=0;b<nBlocks;b++){for(let i=0;i<N_IRR;i++)plan.push(["irrelevant",1]);plan.push(["probe",pc[b%3]]);plan.push(["target",3]);}
+  const n=LEAD+plan.length*TRIAL+FS,idx={Fz:0,C3:1,Cz:2,C4:3,Pz:4,PO7:5,Oz:6,PO8:7};
+  const data=[];for(let c=0;c<8;c++)data.push(pink(n,r));
+  for(const c of["PO7","Oz","PO8","Pz"]){const ph=r()*6.28;for(let i=0;i<n;i++)data[idx[c]][i]+=4*Math.sin(2*Math.PI*10*i/FS+ph);}
+  // 50 Hz line noise to demonstrate the notch filter
+  for(let c=0;c<8;c++){const ph=r()*6.28;for(let i=0;i<n;i++)data[c][i]+=3*Math.sin(2*Math.PI*50*i/FS+ph);}
+  const stim=new Int32Array(n),gg=(t,c,w)=>Math.exp(-0.5*((t-c)/w)**2);let onset=LEAD;
+  for(const[kind,code]of plan){stim[onset]=code;let n1,n2,p3;
+    if(kind==="irrelevant"){[n1,n2,p3]=[-1.2,-0.8,0.3];}else if(kind==="target"){[n1,n2,p3]=[-2.0,-1.5,7.0];}
+    else{if(profile==="guilty")[n1,n2,p3]=[-2.4,-3.8,6.6];else[n1,n2,p3]=[-1.2,-0.8,0.3];}
+    for(let s=-Math.round(0.1*FS);s<Math.round(0.8*FS);s++){const i=onset+s;if(i<0||i>=n)continue;const t=s/FS;
+      const N1=n1*gg(t,0.11,0.02),P2=0.8*gg(t,0.20,0.025),N2=n2*gg(t,0.26,0.03),P3=p3*gg(t,0.36,0.06);
+      const fr=N1+N2+0.3*P2,pa=P3+0.5*P2+0.4*N1;
+      data[idx.Fz][i]+=fr;data[idx.Cz][i]+=fr;data[idx.C3][i]+=0.6*fr;data[idx.C4][i]+=0.6*fr;
+      data[idx.Pz][i]+=pa;data[idx.Cz][i]+=pa;data[idx.PO7][i]+=0.5*pa;data[idx.PO8][i]+=0.5*pa;data[idx.Oz][i]+=0.5*pa;}
+    onset+=TRIAL;}
+  let out="sys_time,eeg_time,ch1,ch2,ch3,ch4,ch5,ch6,ch7,ch8,stimulus\n";const rows=[];
+  for(let i=0;i<n;i++){const t=i/FS;let row=(1.7e9+t).toFixed(6)+","+t.toFixed(6);for(let c=0;c<8;c++)row+=","+data[c][i].toFixed(4);row+=","+stim[i];rows.push(row);}
+  return out+rows.join("\n");
+}
+
+
+/* ===== embedded Python sources (for the collapsible viewer) ===== */
+const PY_CAPTURE="import os\nimport time\n\nfrom utils.utils import KeyLogger, EEGLogger\n\n\ndef get_subject_id():\n    \"\"\"Prompt the user for a subject ID and validate it.\"\"\"\n    subject_id = input(\"Enter the subject ID:\\n\")\n    assert subject_id.isdigit(), \"Subject ID must be a number.\"\n    subject_id = int(subject_id)\n    assert 0 < subject_id < 100, \"Subject ID must be a two-digit number.\"\n    return subject_id\n\n\ndef main():\n\n    # get the file paths for the new recording\n    #key_log_dir = \"data/key_recordings\"\n    eeg_log_dir = \"data/eeg_recordings\"\n    eeg_raw_log_dir = \"data/eeg_raw_recordings\"\n\n    # make sure path is valid\n    #assert os.path.exists(key_log_dir), f\"Key log directory {key_log_dir} does not exist.\"\n    assert os.path.exists(eeg_log_dir), f\"EEG log directory {eeg_log_dir} does not exist.\"\n    assert os.path.exists(eeg_raw_log_dir), f\"EEG raw log directory {eeg_raw_log_dir} does not exist.\"\n\n    # get the subject ID for this run\n    subject_id = get_subject_id()\n    #key_log_dir = os.path.join(key_log_dir, f\"sub-{subject_id:02d}\")\n    eeg_log_dir = os.path.join(eeg_log_dir, f\"sub-{subject_id:02d}\")\n    eeg_raw_log_dir = os.path.join(eeg_raw_log_dir, f\"sub-{subject_id:02d}\")\n    #os.makedirs(key_log_dir, exist_ok=True)\n    os.makedirs(eeg_log_dir, exist_ok=True)\n    os.makedirs(eeg_raw_log_dir, exist_ok=True)\n\n    # get the run number for this recording\n    run_num = len([f for f in os.listdir(eeg_log_dir) if f.endswith(\".csv\")]) + 1\n    recording_name = f\"sub-{subject_id:02d}_run-{run_num:03d}\"\n    #key_log_path = os.path.join(key_log_dir, f\"{recording_name}_key_log.csv\")\n    eeg_prc_log_path = os.path.join(eeg_log_dir, f\"{recording_name}_eeg_prc_log.csv\")\n    eeg_raw_log_path = os.path.join(eeg_raw_log_dir, f\"{recording_name}_eeg_raw_log.csv\")\n\n    # avoid overwriting existing files\n    #assert not os.path.exists(key_log_path), f\"Key log file {key_log_path} already exists.\"\n    assert not os.path.exists(eeg_prc_log_path), f\"EEG log file {eeg_prc_log_path} already exists.\"\n    assert not os.path.exists(eeg_raw_log_path), f\"EEG raw log file {eeg_raw_log_path} already exists.\"\n\n    # NOTE: start cit_image_presentation.py (or whichever stimulus script\n    # creates the \"CIT_Markers\" LSL stream) BEFORE running this script, so\n    # the marker stream already exists when EEGLogger tries to connect to it\n    # below. marker_stream_name is only passed to the RAW logger here -- the\n    # processed stream is a duplicate of the same underlying signal, so only\n    # one of the two CSVs needs the stimulus column. Pass\n    # marker_stream_name=\"CIT_Markers\" to eeg_prc_logger too if you want it\n    # in both files.\n    MARKER_STREAM_NAME = \"CIT_Markers\"\n\n    # Initialize & start loggers\n    #key_logger = KeyLogger(key_log_path)\n    eeg_prc_logger = EEGLogger(eeg_prc_log_path, stream_name=\"UnicornRecorderLSLStream\", marker_stream_name=MARKER_STREAM_NAME)\n    eeg_raw_logger = EEGLogger(eeg_raw_log_path, stream_name=\"UnicornRecorderRawDataLSLStream\",\n                                marker_stream_name=MARKER_STREAM_NAME)\n    #key_logger.start()\n    eeg_prc_logger.start()\n    eeg_raw_logger.start()\n\n    # Keep the script running to log data\n    try:\n        while True:\n            time.sleep(3)\n            print(\"Logging data...\")\n\n    except KeyboardInterrupt:\n        print(\"Stopping data collection...\")\n        #del key_logger\n        del eeg_prc_logger\n        del eeg_raw_logger\n\n\nif __name__ == \"__main__\":\n    main()", PY_PRESENT="\"\"\"\nP300 Concealed Information Test using IMAGES, with pygame for display.\n\nHow it works:\n  - You put your image files in an `images/` folder next to this script\n  - One or more images are \"probes\" -- things your friend recognizes\n  - One image is the \"target\" -- a known image they're told to react to\n    (e.g. press spacebar when they see it) -- this is the positive control\n  - The rest are \"irrelevant\" images -- neutral, shown more often than the\n    probe/target so the sequence looks like a normal oddball stream\n\nEach time an image is displayed on screen, an LSL marker is sent in the SAME\nmoment, so the marker timestamp matches when your friend actually saw it.\nEach probe image gets its own unique marker code (see PROBE_EVENT_CODES),\nso you can distinguish exactly which probe was shown afterward.\n\nFolder layout expected:\n    your_project_folder/\n    \u251c\u2500\u2500 cit_image_presentation.py   <- this file\n    \u2514\u2500\u2500 images/\n        \u251c\u2500\u2500 probe.jpg                <- recognized image\n        \u251c\u2500\u2500 probe1.jpg                <- another recognized image\n        \u251c\u2500\u2500 probe2.jpg                <- another recognized image\n        \u251c\u2500\u2500 target.jpg                <- known/respond-to image\n        \u251c\u2500\u2500 irrelevant_1.jpg\n        \u251c\u2500\u2500 irrelevant_2.jpg\n        \u2514\u2500\u2500 ... (as many irrelevants as you like)\n\nUsage:\n    python cit_image_presentation.py\n\"\"\"\n\nimport os\nimport random\nimport time\n\nimport pygame\nfrom pylsl import StreamInfo, StreamOutlet\n\n# ---------------------------------------------------------------------------\n# Configuration\n# ---------------------------------------------------------------------------\nSCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))\nIMAGE_DIR = os.path.join(SCRIPT_DIR, \"images\")\nPROBE_FILENAMES = {\"probe1.JPG\", \"probe2.JPG\", \"probe3.JPG\"}  # all images your friend recognizes\nTARGET_FILENAME = \"target.jpg\"      # known image they respond to (positive control)\n# Everything else in IMAGE_DIR (besides probes/target) is treated as irrelevant.\n# Each probe image gets its OWN marker code (see PROBE_EVENT_CODES below), so\n# you can tell exactly which probe was shown at analysis time, rather than\n# pooling them all under one generic \"probe\" code.\n\nN_IRRELEVANT_PER_BLOCK = 5   # irrelevant images shown between each probe/target\nN_BLOCKS = 15                # repeats of the irrelevant+probe+target cycle\nIMAGE_DURATION_S = 1.0       # how long each image stays on screen\nISI_S = 1.5                  # blank gray screen between images\n\n# Fixed codes for the non-probe trial types.\nEVENT_CODES = {\n    \"irrelevant\": 1,\n    \"target\": 3,\n    \"response\": 4,\n}\n\n# Each probe filename gets its own unique code, starting at 100 so there's no\n# risk of colliding with the fixed codes above (or with each other, even if\n# you add more probes later). Sorted so the same filename always gets the\n# same code across different runs of the script.\n#   e.g. {\"probe.jpg\": 100, \"probe1.jpg\": 101, \"probe2.jpg\": 102}\nPROBE_EVENT_CODES = {\n    filename: 100 + i for i, filename in enumerate(sorted(PROBE_FILENAMES))\n}\n\nSCREEN_SIZE = (800, 600)\nBACKGROUND_COLOR = (40, 40, 40)\n\n\ndef create_marker_outlet(stream_name=\"CIT_Markers\"):\n    info = StreamInfo(\n        name=stream_name,\n        type=\"Markers\",\n        channel_count=1,\n        nominal_srate=0,\n        channel_format=\"int32\",\n        source_id=\"cit_image_marker_stream\",\n    )\n    outlet = StreamOutlet(info)\n    print(f\"Marker LSL outlet '{stream_name}' created and broadcasting.\")\n    return outlet\n\n\ndef send_marker(outlet, event_code):\n    outlet.push_sample([event_code])\n\n\ndef discover_images(image_dir):\n    \"\"\"\n    Scans the images/ folder and sorts files into probes, target, and\n    irrelevant categories based on filename.\n    \"\"\"\n    if not os.path.isdir(image_dir):\n        raise FileNotFoundError(\n            f\"Image folder '{image_dir}' not found. Create it next to this \"\n            f\"script and put your images inside (see the docstring at the \"\n            f\"top of this file for the expected layout).\"\n        )\n\n    all_files = [\n        f for f in os.listdir(image_dir)\n        if f.lower().endswith((\".jpg\", \".jpeg\", \".png\", \".bmp\"))\n    ]\n\n    missing_probes = PROBE_FILENAMES - set(all_files)\n    if missing_probes:\n        raise FileNotFoundError(\n            f\"Expected probe image(s) {sorted(missing_probes)} not found in '{image_dir}'.\"\n        )\n    if TARGET_FILENAME not in all_files:\n        raise FileNotFoundError(\n            f\"Expected target image '{TARGET_FILENAME}' not found in '{image_dir}'.\"\n        )\n\n    excluded = PROBE_FILENAMES | {TARGET_FILENAME}\n    irrelevant_files = [f for f in all_files if f not in excluded]\n    if not irrelevant_files:\n        raise ValueError(\n            f\"No irrelevant images found in '{image_dir}'. Add at least a \"\n            f\"few neutral images besides your probe and target images.\"\n        )\n\n    return {\n        \"probes\": [os.path.join(image_dir, f) for f in sorted(PROBE_FILENAMES)],\n        \"target\": os.path.join(image_dir, TARGET_FILENAME),\n        \"irrelevant\": [os.path.join(image_dir, f) for f in irrelevant_files],\n    }\n\n\ndef build_trial_sequence(images):\n    \"\"\"\n    One block = N_IRRELEVANT_PER_BLOCK irrelevants + 1 probe + 1 target.\n    Probe images are rotated through round-robin across blocks (block 1 uses\n    probes[0], block 2 uses probes[1], etc., wrapping around), so with\n    enough blocks every probe image gets shown roughly the same number of\n    times overall.\n\n    Each trial in the returned sequence is (label, image_path, event_code):\n      - label: human-readable string for console printing (\"irrelevant\",\n        \"target\", or the probe's own filename e.g. \"probe1.jpg\")\n      - image_path: full path to the image file to display\n      - event_code: the exact LSL marker code to send for this trial. Probes\n        each get their own unique code from PROBE_EVENT_CODES, so you can\n        tell exactly which probe was shown when analyzing the recording\n        afterward.\n    \"\"\"\n    probes = images[\"probes\"]\n    sequence = []\n    for block_idx in range(N_BLOCKS):\n        n_pick = min(N_IRRELEVANT_PER_BLOCK, len(images[\"irrelevant\"]))\n        block_irrelevants = random.sample(images[\"irrelevant\"], k=n_pick)\n        for path in block_irrelevants:\n            sequence.append((\"irrelevant\", path, EVENT_CODES[\"irrelevant\"]))\n\n        probe_path = probes[block_idx % len(probes)]\n        probe_filename = os.path.basename(probe_path)\n        sequence.append((probe_filename, probe_path, PROBE_EVENT_CODES[probe_filename]))\n\n        sequence.append((\"target\", images[\"target\"], EVENT_CODES[\"target\"]))\n    return sequence\n\n\ndef run_session():\n    images = discover_images(IMAGE_DIR)\n    print(f\"Found {len(images['irrelevant'])} irrelevant images, \"\n          f\"{len(images['probes'])} probe image(s), 1 target ({TARGET_FILENAME}).\")\n    print(\"Probe marker codes:\")\n    for filename, code in sorted(PROBE_EVENT_CODES.items()):\n        print(f\"  {filename}: code={code}\")\n    print(f\"Other codes: irrelevant={EVENT_CODES['irrelevant']}, \"\n          f\"target={EVENT_CODES['target']}, response={EVENT_CODES['response']}\")\n\n    outlet = create_marker_outlet()\n\n    pygame.init()\n    screen = pygame.display.set_mode(SCREEN_SIZE)\n    pygame.display.set_caption(\"CIT Image Presentation\")\n    font = pygame.font.SysFont(None, 36)\n\n    def show_blank():\n        screen.fill(BACKGROUND_COLOR)\n        pygame.display.flip()\n\n    def show_message(text):\n        screen.fill(BACKGROUND_COLOR)\n        label = font.render(text, True, (255, 255, 255))\n        rect = label.get_rect(center=(SCREEN_SIZE[0] // 2, SCREEN_SIZE[1] // 2))\n        screen.blit(label, rect)\n        pygame.display.flip()\n\n    show_message(\"Press SPACE to begin\")\n    waiting = True\n    while waiting:\n        for event in pygame.event.get():\n            if event.type == pygame.QUIT:\n                pygame.quit()\n                return\n            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:\n                waiting = False\n\n    sequence = build_trial_sequence(images)\n    print(f\"Running {len(sequence)} trials.\")\n\n    for label, image_path, event_code in sequence:\n        img = pygame.image.load(image_path)\n        img = pygame.transform.scale(img, SCREEN_SIZE)\n\n        # --- Show the image AND send the marker at the same moment ---\n        screen.blit(img, (0, 0))\n        pygame.display.flip()\n        send_marker(outlet, event_code)   # <-- marker fires here, right as the image appears\n\n        is_probe = label in PROBE_EVENT_CODES\n        print(f\"[{'PROBE: ' + label if is_probe else label.upper()}] code={event_code}\")\n\n        # Watch for a response during target display (positive control)\n        responded = False\n        trial_start = time.time()\n        while time.time() - trial_start < IMAGE_DURATION_S:\n            for event in pygame.event.get():\n                if event.type == pygame.QUIT:\n                    pygame.quit()\n                    return\n                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:\n                    if label == \"target\" and not responded:\n                        send_marker(outlet, EVENT_CODES[\"response\"])\n                        responded = True\n\n        # --- Blank/ISI period ---\n        show_blank()\n        time.sleep(ISI_S)\n\n    show_message(\"Session complete\")\n    time.sleep(2)\n    pygame.quit()\n    print(\"\\nSession complete.\")\n\n\nif __name__ == \"__main__\":\n    # Make sure to run: pip install pylsl pygame\n    run_session()", PY_UTILS="import os\nimport threading\nimport time\n\n# keyboard related imports\nfrom pynput.keyboard import Listener\nfrom pyKey import pressKey, releaseKey\n\n# eeg streaming related imports\nfrom pylsl import StreamInlet, resolve_streams, resolve_byprop\n\n\ndef trigger_jump(delay=0.05):\n    \"\"\" This function simulates a jump in the game Canabalt \"\"\"\n    trigger_key('space', delay)\n\n\ndef trigger_key(key_name, delay=0.05):\n    \"\"\" This function simulates a key press \"\"\"\n    pressKey(key_name)\n    time.sleep(delay)\n    releaseKey(key_name)\n\n\nclass KeyLogger:\n\n    def __init__(self, csv_file_path):\n\n        self.csv_file_path = csv_file_path\n        if os.path.exists(csv_file_path):\n            raise FileExistsError(f\"File {csv_file_path} already exists.\")\n        self.log_file = open(csv_file_path, 'w', newline='\\n')\n        self.log_file.write('timestamp,key\\n')\n        self.log_file.flush()  # Ensure data is written to the file\n\n        self.key_listener = Listener(on_press=self.on_press, on_release=self.on_release)\n        self.key_listener.daemon = True\n\n    def start(self):\n        \"\"\"Start the key logger.\"\"\"\n        if not self.key_listener.is_alive():\n            self.key_listener.start()\n\n    def on_press(self, key):\n        key = str(key)\n        key = key.replace(\"Key.\", \"\")\n        print(f\"Key pressed: {key}\")  # Debug print\n        t = time.time()\n        self.log_file.write(f\"{t},{key}_press\\n\")\n        self.log_file.flush()  # Ensure data is written to the file\n\n    def on_release(self, key):\n        key = str(key)\n        key = key.replace(\"'\", \"\")\n        key = key.replace(\"Key.\", \"\")\n        print(f\"Key released: {key}\")  # Debug print\n        t = time.time()\n        self.log_file.write(f\"{t},{key}_release\\n\")\n        self.log_file.flush()  # Ensure data is written to the file\n\n    def __del__(self):\n        self.key_listener.stop()\n        self.log_file.close()\n\n\ndef get_lsl_stream(stream_name) -> StreamInlet:\n    \"\"\"\n    Get an LSL stream with a specific name.\n\n    Parameters:\n        stream_name (str): The name of the LSL stream to find.\n    \"\"\"\n    print(f\"Looking for an LSL stream with name '{stream_name}'...\")\n    streams = resolve_streams()\n\n    print(\"available stream names:\")\n    print([stream.name() for stream in streams])\n\n    # Iterate over all streams to find a stream with a matching name\n    for i, stream in enumerate(streams):\n        if stream.name() == stream_name:\n            inlet = StreamInlet(streams[i])\n            return inlet\n\n    print(f\"Stream '{stream_name}' not found.\")\n    return None\n\n\nclass EEGListener:\n\n    \"\"\" This class acts as a listener for EEG data runnning in the background.\n    A callback function can be given to process the data as it arrives.\n    The main part of this class is to handle the threading and the LSL stream.\n    \"\"\"\n\n    def __init__(self, stream_name, callback=None):\n        self.stream_name = stream_name\n        self.callback = callback\n\n        # Resolve the LSL stream\n        self.lsl_stream = get_lsl_stream(stream_name)\n        if self.lsl_stream is None:\n            raise ValueError(f\"Stream '{stream_name}' not found.\")\n\n        # Create a new thread for the LSL stream\n        self.running = False\n        self.thread = threading.Thread(target=self.record_eeg)\n        self.thread.daemon = True\n\n    def record_eeg(self):\n        \"\"\"Record EEG data from the LSL stream.\"\"\"\n        self.running = True\n        while self.running:\n            sample, eeg_time = self.lsl_stream.pull_sample(timeout=1.0)  # blocking\n            sys_time = time.time()\n\n            if sample is None:  # timeout\n                print(\"No sample received.\")  # Debug print\n                continue\n\n            # print(f\"Sample received: {sample}\")  # Debug print\n            if self.callback:\n                self.callback(sample, sys_time, eeg_time)\n\n    def start(self):\n        \"\"\"Start the EEG listener.\"\"\"\n        if not self.thread.is_alive():\n            self.thread.start()\n\n    def stop(self):\n        \"\"\"Stop the EEG listener.\"\"\"\n        if self.thread.is_alive():\n            self.running = False\n            self.thread.join(timeout=1)\n            if self.thread.is_alive():\n                print(\"Warning: Thread did not stop in time.\")\n\n    def close(self):\n        \"\"\"Close the EEG listener.\"\"\"\n        self.stop()\n        if self.lsl_stream:\n            self.lsl_stream.close_stream()\n            self.lsl_stream = None\n\n    def __del__(self):\n        \"\"\"Destructor for the EEG listener.\"\"\"\n        self.close()\n\n\nclass MarkerListener:\n    \"\"\"\n    Listens to a Markers-type LSL stream (e.g. the one created by\n    cit_image_presentation.py) in a background thread, and keeps track of the\n    single most recent marker code + its LSL timestamp. EEGLogger polls\n    `get_latest_marker_code(eeg_timestamp)` once per incoming EEG sample to\n    decide what (if anything) to write in its stimulus column for that row.\n    \"\"\"\n\n    def __init__(self, stream_name=\"CIT_Markers\", timeout=10):\n        print(f\"Looking for marker stream '{stream_name}'...\")\n        streams = resolve_byprop(\"name\", stream_name, timeout=timeout)\n        if not streams:\n            raise ValueError(\n                f\"Marker stream '{stream_name}' not found. Make sure your \"\n                f\"stimulus presentation script (e.g. cit_image_presentation.py) \"\n                f\"is already running before starting the EEG logger.\"\n            )\n        self.inlet = StreamInlet(streams[0])\n        print(f\"Connected to marker stream '{stream_name}'.\")\n\n        self._lock = threading.Lock()\n        self._pending = []  # list of (event_code, marker_timestamp), oldest first\n        self.running = False\n        self.thread = threading.Thread(target=self._listen_loop, daemon=True)\n\n    def start(self):\n        if not self.thread.is_alive():\n            self.running = True\n            self.thread.start()\n\n    def _listen_loop(self):\n        while self.running:\n            sample, timestamp = self.inlet.pull_sample(timeout=1.0)\n            if sample is None:\n                continue\n            with self._lock:\n                self._pending.append((int(sample[0]), timestamp))\n\n    def consume_marker_for(self, eeg_timestamp):\n        \"\"\"\n        Returns the event code that should be attached to an EEG sample at\n        eeg_timestamp, or 0 if no marker applies yet. Pops (consumes) the\n        oldest pending marker once an EEG sample at or after its timestamp\n        arrives, so each marker gets attached exactly once.\n        \"\"\"\n        with self._lock:\n            if self._pending and self._pending[0][1] <= eeg_timestamp:\n                code, _ = self._pending.pop(0)\n                return code\n        return 0\n\n    def stop(self):\n        if self.thread.is_alive():\n            self.running = False\n            self.thread.join(timeout=1)\n\n    def close(self):\n        self.stop()\n        if self.inlet:\n            self.inlet.close_stream()\n            self.inlet = None\n\n    def __del__(self):\n        self.close()\n\n\nclass EEGLogger:\n\n    def __init__(self, log_file_path, stream_name=\"UnicornRecorderLSLStream\",\n                 marker_stream_name=None):\n        \"\"\"\n        marker_stream_name: if given (e.g. \"CIT_Markers\"), this logger will\n        ALSO connect to that LSL marker stream and add a 'stimulus' column to\n        the CSV, populated with the event code active at each EEG sample (0\n        if no marker at that moment). Leave as None (default) to log EEG only,\n        with no behavior change from before.\n        \"\"\"\n        self.stream_name = stream_name\n        self.log_file_path = log_file_path\n        self.use_markers = marker_stream_name is not None\n\n        self.log_file = open(log_file_path, 'w', newline='\\n')\n        if self.use_markers:\n            self.log_file.write('sys_time,eeg_time,ch1,ch2,ch3,ch4,ch5,ch6,ch7,ch8,stimulus\\n')\n        else:\n            self.log_file.write('sys_time,eeg_time,ch1,ch2,ch3,ch4,ch5,ch6,ch7,ch8\\n')\n        self.log_file.flush()  # Ensure data is written to the file\n\n        self.marker_listener = None\n        if self.use_markers:\n            self.marker_listener = MarkerListener(stream_name=marker_stream_name)\n            self.marker_listener.start()\n\n        self.eeg_listener = EEGListener(stream_name, self.log_eeg_data)\n\n    def start(self):\n        \"\"\"Start the EEG logger.\"\"\"\n        if not self.eeg_listener.thread.is_alive():\n            self.eeg_listener.start()\n\n    def log_eeg_data(self, sample, sys_time, eeg_time):\n        \"\"\"Log EEG data (and, if enabled, the current stimulus marker code) to a CSV file.\"\"\"\n        sample = sample[:8]  # remove non-channel data\n        if self.use_markers:\n            stim_code = self.marker_listener.consume_marker_for(eeg_time)\n            self.log_file.write(f\"{sys_time},{eeg_time},{','.join(map(str, sample))},{stim_code}\\n\")\n        else:\n            self.log_file.write(f\"{sys_time},{eeg_time},{','.join(map(str, sample))}\\n\")\n        self.log_file.flush()  # Ensure data is written to the file\n\n    def __del__(self):\n        \"\"\"Destructor for the EEG logger.\"\"\"\n        self.eeg_listener.stop()\n        if self.marker_listener is not None:\n            self.marker_listener.stop()\n        self.log_file.close()";
+
+const $=id=>document.getElementById(id);
+let lang="de";
+function setLang(l){lang=l;document.body.classList.toggle("en",l==="en");$("de").classList.toggle("on",l==="de");$("en").classList.toggle("on",l==="en");document.documentElement.lang=l;
+  renderImages();imgStatus();if(result)renderAll();}
+function showTab(t){if(t!=="images"&&prevTimer) stopPreview();["images","capture","analyse"].forEach(x=>{$("pane-"+x).classList.toggle("on",x===t);$("tab-"+x).classList.toggle("on",x===t);});}
+function download(name,text,mime){const b=new Blob([text],{type:mime||"text/plain"});const u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function copyText(t,btn){navigator.clipboard.writeText(t).then(()=>{const o=btn.textContent;btn.textContent=lang==="de"?"kopiert ✓":"copied ✓";setTimeout(()=>btn.textContent=o,1400);});}
+
+/* ========== TAB 1: images ========== */
+let images=[],imgId=0;
+const up=$("uploader");
+up.addEventListener("click",()=>$("fileImg").click());
+$("fileImg").addEventListener("change",e=>addFiles(e.target.files));
+["dragover","dragenter"].forEach(ev=>up.addEventListener(ev,e=>{e.preventDefault();up.classList.add("drag");}));
+["dragleave","drop"].forEach(ev=>up.addEventListener(ev,e=>{e.preventDefault();up.classList.remove("drag");}));
+up.addEventListener("drop",e=>{if(e.dataTransfer.files)addFiles(e.dataTransfer.files);});
+function addFiles(list){[...list].filter(f=>f.type.startsWith("image/")).forEach(f=>{const r=new FileReader();r.onload=()=>{images.push({id:++imgId,name:f.name,url:r.result,cat:null});renderImages();imgStatus();};r.readAsDataURL(f);});}
+function setCat(id,cat){const im=images.find(i=>i.id===id);if(!im)return;if(cat==="target"&&im.cat!=="target")images.forEach(i=>{if(i.cat==="target")i.cat=null;});im.cat=(im.cat===cat?null:cat);renderImages();imgStatus();}
+function removeImg(id){images=images.filter(i=>i.id!==id);renderImages();imgStatus();}
+function probeOrder(){return images.filter(i=>i.cat==="probe").sort((a,b)=>a.name.localeCompare(b.name));}
+function codeMap(){const m={};probeOrder().forEach((im,i)=>m[im.id]=100+i);images.forEach(im=>{if(im.cat==="target")m[im.id]=3;if(im.cat==="irrelevant")m[im.id]=1;});return m;}
+function chip(im,code){const c=code!==undefined?`<span class="code">${code}</span>`:"";const b=(cat,l)=>`<button class="${im.cat===cat?"on":""}" title="${l}" onclick="setCat(${im.id},'${cat}')">${l}</button>`;
+  return `<div class="chip"><img src="${im.url}" alt=""><span class="nm">${im.name}</span>${c}<span class="mv">${b("probe","T")}${b("irrelevant","I")}${b("target","Z")}<button class="x" onclick="removeImg(${im.id})">✕</button></span></div>`;}
+function renderImages(){const cm=codeMap();
+  $("trayChips").innerHTML=images.filter(i=>!i.cat).map(im=>chip(im)).join("")||`<span style="font-size:11px;color:var(--faint)">${lang==="de"?"alle zugeordnet":"all assigned"}</span>`;
+  $("list-probe").innerHTML=probeOrder().map(im=>chip(im,cm[im.id])).join("");$("ct-probe").textContent=probeOrder().length;
+  ["irrelevant","target"].forEach(cat=>{const arr=images.filter(i=>i.cat===cat);$("list-"+cat).innerHTML=arr.map(im=>chip(im,cm[im.id])).join("");$("ct-"+cat).textContent=arr.length;});}
+function imgStatus(){const pr=probeOrder().length,tg=images.filter(i=>i.cat==="target").length,ir=images.filter(i=>i.cat==="irrelevant").length;
+  const e=[];if(pr<1)e.push(lang==="de"?"≥1 Sonde":"≥1 probe");if(tg!==1)e.push(lang==="de"?"genau 1 Ziel":"exactly 1 target");if(ir<1)e.push(lang==="de"?"≥1 irrelevant":"≥1 irrelevant");
+  const st=$("imgStatus");if(e.length){st.className="status warn";st.innerHTML=(lang==="de"?"Fehlt: ":"Missing: ")+e.join(", ")+".";}
+  else{st.className="status ok";st.innerHTML=(lang==="de"?`Bereit: ${pr} Sonden, ${ir} irrelevant, 1 Ziel.`:`Ready: ${pr} probes, ${ir} irrelevant, 1 target.`)+(ir<3?(lang==="de"?" (≥3 irrelevant empfohlen)":" (≥3 irrelevant recommended)"):"");}}
+function imagesValid(){return probeOrder().length>=1&&images.filter(i=>i.cat==="target").length===1&&images.filter(i=>i.cat==="irrelevant").length>=1;}
+
+/* ========== STIMULUS PREVIEW PLAYER ========== */
+const IMG_DUR_MS  = 1000;  // must match cit_image_presentation.py IMAGE_DURATION_S
+const ISI_MS      = 1500;  // must match ISI_S
+const IRRS_PER_BLOCK = 5;  // must match N_IRRELEVANT_PER_BLOCK
+const N_BLOCKS    = 15;    // must match N_BLOCKS
+
+let prevTimer=null, prevSeq=[], prevIdx=0, prevSpeed=1;
+let fsWin=null; // fullscreen popup window reference
+
+function buildPreviewSequence(){
+  const probes=probeOrder();
+  const irrels=images.filter(i=>i.cat==="irrelevant");
+  const tgts=images.filter(i=>i.cat==="target");
+  if(!probes.length||!irrels.length||!tgts.length) return [];
+  const seq=[];
+  for(let b=0;b<N_BLOCKS;b++){
+    // shuffle irrelevant for this block
+    const pool=[...irrels].sort(()=>Math.random()-.5);
+    const n=Math.min(IRRS_PER_BLOCK, pool.length);
+    for(let i=0;i<n;i++) seq.push({type:"irrelevant", img:pool[i%pool.length], block:b+1});
+    seq.push({type:"probe", img:probes[b%probes.length], block:b+1});
+    seq.push({type:"target", img:tgts[0], block:b+1});
+  }
+  return seq;
+}
+
+function buildStripHTML(seq, curIdx){
+  return seq.map((s,i)=>`<div class="sq ${s.type}${i<curIdx?" done":""}${i===curIdx?" cur":""}"></div>`).join("");
+}
+
+function setSpeed(n, btn){
+  prevSpeed=n;
+  document.querySelectorAll("#speedSeg button").forEach(b=>b.classList.remove("on"));
+  btn.classList.add("on");
+}
+
+function showStage(item, isiPhase){
+  const stage=$("stage");
+  if(isiPhase){
+    stage.innerHTML=`<div class="stage-empty" style="color:var(--faint)">+</div>`;
+    return;
+  }
+  const badgeCls=item.type;
+  const badgeTxt=lang==="de"
+    ?{probe:"Sonde",target:"Ziel",irrelevant:"Irrelevant"}[item.type]
+    :{probe:"Probe",target:"Target",irrelevant:"Irrelevant"}[item.type];
+  stage.innerHTML=`<img src="${item.img.url}" alt="${item.type}"><div class="stage-badge ${badgeCls}">${badgeTxt}</div>`;
+  // mirror to fullscreen popup if open
+  if(fsWin&&!fsWin.closed){
+    try{
+      const fsImg=fsWin.document.getElementById("fsImg");
+      const fsBadge=fsWin.document.getElementById("fsBadge");
+      if(fsImg){ fsImg.src=item.img.url; }
+      if(fsBadge){ fsBadge.textContent=badgeTxt; fsBadge.className="fs-badge "+badgeCls; }
+    }catch(e){}
+  }
+}
+
+function clearStage(){
+  const stage=$("stage");
+  stage.innerHTML=`<div class="stage-empty" id="stageEmpty"><span data-de>Bilder zuordnen, dann Vorschau starten</span><span data-en>Assign images, then start preview</span></div>`;
+  if(fsWin&&!fsWin.closed){ try{ fsWin.close(); }catch(e){} fsWin=null; }
+}
+
+function updateSidePanel(item, idx, total){
+  $("seqBlock").textContent=item?item.block+"":"-";
+  $("seqStim").textContent=idx+1+"/"+total;
+  $("seqLeft").textContent=(total-idx-1)+" "+(lang==="de"?"übrig":"left");
+  const pct=Math.round((idx+1)/total*100);
+  $("seqBar").style.width=pct+"%";
+  $("seqStrip").innerHTML=buildStripHTML(prevSeq, idx);
+}
+
+function tickPreview(){
+  if(prevIdx>=prevSeq.length){ stopPreview(); return; }
+  const item=prevSeq[prevIdx];
+  showStage(item, false);
+  updateSidePanel(item, prevIdx, prevSeq.length);
+  const imgDur=Math.round(IMG_DUR_MS/prevSpeed);
+  const isiDur=Math.round(ISI_MS/prevSpeed);
+  prevTimer=setTimeout(()=>{
+    showStage(null, true); // ISI — blank fixation cross
+    if(fsWin&&!fsWin.closed){
+      try{
+        const fsImg=fsWin.document.getElementById("fsImg");
+        const fsBadge=fsWin.document.getElementById("fsBadge");
+        if(fsImg){ fsImg.src=""; fsImg.style.display="none"; }
+        if(fsBadge) fsBadge.textContent="";
+      }catch(e){}
+    }
+    prevTimer=setTimeout(()=>{ prevIdx++; tickPreview(); }, isiDur);
+  }, imgDur);
+}
+
+function startPreview(){
+  if(!imagesValid()){
+    $("previewStatus").textContent=lang==="de"?"Erst alle Bilder zuordnen.":"Assign all images first.";
+    return;
+  }
+  prevSeq=buildPreviewSequence();
+  if(!prevSeq.length){ $("previewStatus").textContent=lang==="de"?"Keine Sequenz möglich.":"Cannot build sequence."; return; }
+  prevIdx=0;
+  $("previewStatus").textContent="";
+  $("btnPreview").style.display="none";
+  $("btnPreviewStop").style.display="inline-flex";
+  $("btnFullscreen").style.display="inline-flex";
+  $("seqStrip").innerHTML=buildStripHTML(prevSeq,0);
+  tickPreview();
+}
+
+function stopPreview(){
+  clearTimeout(prevTimer); prevTimer=null;
+  $("btnPreview").style.display="inline-flex";
+  $("btnPreviewStop").style.display="none";
+  $("btnFullscreen").style.display="none";
+  clearStage();
+  $("seqBlock").textContent="—";$("seqStim").textContent="—";$("seqLeft").textContent="—";
+  $("seqBar").style.width="0%";$("seqStrip").innerHTML="";
+  $("previewStatus").textContent=lang==="de"?"Gestoppt.":"Stopped.";
+}
+
+function openFullscreen(){
+  const html=`<!DOCTYPE html><html><head><meta charset=utf-8>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#000;display:flex;align-items:center;justify-content:center;height:100vh;width:100vw;overflow:hidden;position:relative}
+#fsImg{max-width:100%;max-height:100%;object-fit:contain;display:block}
+.fs-badge{position:absolute;top:16px;left:16px;font-family:sans-serif;font-size:13px;font-weight:700;padding:4px 12px;border-radius:7px;letter-spacing:.06em;text-transform:uppercase}
+.fs-badge.probe{background:rgba(255,92,122,.9);color:#fff}.fs-badge.target{background:rgba(91,209,122,.9);color:#111}.fs-badge.irrelevant{background:rgba(133,147,161,.5);color:#ddd}
+</style></head><body><img id="fsImg" src="" alt=""><div class="fs-badge" id="fsBadge"></div></body></html>`;
+  fsWin=window.open("","_blank","width=960,height=720,toolbar=no,menubar=no,scrollbars=no");
+  if(!fsWin){ $("previewStatus").textContent=lang==="de"?"Popup blockiert — bitte erlauben.":"Popup blocked — please allow."; return; }
+  fsWin.document.write(html);
+  fsWin.document.close();
+}
+
+/* ========== TAB 2: capture (local helper) ========== */
+const isFile=location.protocol==="file:";
+let capTimer=null, capStart=0, capturedCSV=null, capturedName=null;
+async function checkServer(){
+  const dot=$("srvDot"),txt=$("srvText");
+  if(isFile){dot.className="dotc down";txt.innerHTML=lang==="de"?"getrennt — öffne die Seite über <code>python cit_server.py</code> (z. B. http://127.0.0.1:8000).":"disconnected — open the page via <code>python cit_server.py</code> (e.g. http://127.0.0.1:8000).";return false;}
+  try{const r=await fetch("/health",{cache:"no-store"});if(r.ok){dot.className="dotc up";txt.innerHTML=lang==="de"?"verbunden — bereit zur Aufnahme.":"connected — ready to record.";return true;}}catch(e){}
+  dot.className="dotc down";txt.innerHTML=lang==="de"?"getrennt — starte <code>python cit_server.py</code> und lade neu.":"disconnected — start <code>python cit_server.py</code> and reload.";return false;}
+async function startCapture(){
+  if(!imagesValid()){capMsgShow("warn",lang==="de"?"Erst in Tab 1 Bilder zuordnen (≥1 Sonde, 1 Ziel, ≥1 irrelevant).":"Assign images in tab 1 first (≥1 probe, 1 target, ≥1 irrelevant).");showTab("images");return;}
+  const payload={subject:+$("subjId").value, images:images.filter(i=>i.cat).map(i=>({name:i.name,cat:i.cat,data:i.url}))};
+  capMsgShow("",lang==="de"?"Starte Präsentation und Aufnahme …":"Starting presentation and recording …");
+  try{
+    const r=await fetch("/capture/start",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    if(!r.ok){const t=await r.text();throw new Error(t||("HTTP "+r.status));}
+    $("btnStart").style.display="none";$("btnStop").style.display="inline-flex";$("liveInd").style.display="inline-flex";$("csvResult").style.display="none";
+    capStart=Date.now();capTimer=setInterval(tick,500);capMsgHide();
+  }catch(e){capMsgShow("err",(lang==="de"?"Start fehlgeschlagen: ":"Start failed: ")+e.message+(isFile?(lang==="de"?" — Seite über cit_server.py öffnen.":" — open the page via cit_server.py."):""));}
+}
+function tick(){const s=Math.floor((Date.now()-capStart)/1000);$("elapsed").textContent=Math.floor(s/60)+":"+String(s%60).padStart(2,"0");}
+async function stopCapture(){
+  capMsgShow("",lang==="de"?"Stoppe und schreibe CSV …":"Stopping and writing CSV …");
+  clearInterval(capTimer);
+  try{
+    const r=await fetch("/capture/stop",{method:"POST"});
+    if(!r.ok){const t=await r.text();throw new Error(t||("HTTP "+r.status));}
+    const j=await r.json();
+    capturedCSV=j.csv; capturedName=j.filename||"recording.csv";
+    $("btnStop").style.display="none";$("btnStart").style.display="inline-flex";$("liveInd").style.display="none";
+    $("csvName").textContent=capturedName;$("csvRows").textContent=(j.rows!=null?j.rows:"?")+" "+(lang==="de"?"Zeilen":"rows");
+    $("csvPreview").textContent=(capturedCSV||"").split("\n").slice(0,18).join("\n")+"\n…";
+    $("csvResult").style.display="block";capMsgHide();
+  }catch(e){$("btnStop").style.display="none";$("btnStart").style.display="inline-flex";$("liveInd").style.display="none";
+    capMsgShow("err",(lang==="de"?"Stopp fehlgeschlagen: ":"Stop failed: ")+e.message);}
+}
+function capMsgShow(cls,t){const m=$("capMsg");m.style.display="block";m.className="status"+(cls?" "+cls:"");m.innerHTML=t;}
+function capMsgHide(){$("capMsg").style.display="none";}
+function downloadCaptured(){if(capturedCSV)download(capturedName,capturedCSV,"text/csv");}
+function useInAnalysis(){if(!capturedCSV)return;csvText=capturedCSV;srcSet(capturedName);showTab("analyse");}
+
+function buildCodePanels(){
+  const files=[{fn:"cit_image_presentation.py",src:PY_PRESENT,dl:"cit_image_presentation.py"},{fn:"capture_lie.py",src:PY_CAPTURE,dl:"capture_lie.py"},{fn:"utils.py",src:PY_UTILS,dl:"utils.py"}];
+  $("codePanels").innerHTML=files.map((f,i)=>`<div class="codePanel" id="icp${i}"><div class="bar" onclick="document.getElementById('icp${i}').classList.toggle('open')"><div class="t"><span class="chev">▶</span><span class="fn">${f.fn}</span></div><span class="cap">Python</span></div><div class="body"><pre id="icode${i}"></pre><div class="acts"><button class="btn" onclick="copyText(CODE[${i}],this)"><span data-de>Kopieren</span><span data-en>Copy</span></button><button class="btn" onclick="download('${f.dl}',CODE[${i}],'text/x-python')"><span data-de>Herunterladen</span><span data-en>Download</span></button></div></div></div>`).join("");
+  window.CODE=files.map(f=>f.src);files.forEach((f,i)=>$("icode"+i).textContent=f.src);}
+
+/* ========== TAB 3: analysis ========== */
+let result=null, csvText=null, curCh="Pz";
+const COND=[{id:"irrelevant",v:"--c-irr",de:"Irrelevant",en:"Irrelevant"},{id:"target",v:"--c-tgt",de:"Ziel",en:"Target"},
+  {id:"probe_1",v:"--c-p1",de:"Sonde 1",en:"Probe 1"},{id:"probe_2",v:"--c-p2",de:"Sonde 2",en:"Probe 2"},{id:"probe_3",v:"--c-p3",de:"Sonde 3",en:"Probe 3"}];
+const COL=id=>getComputedStyle(document.documentElement).getPropertyValue(COND.find(c=>c.id===id).v).trim();
+const LBL=id=>{const c=COND.find(c=>c.id===id);return c?(lang==="de"?c.de:c.en):id;};
+const drop=$("drop");
+drop.addEventListener("click",()=>$("fileCsv").click());
+$("fileCsv").addEventListener("change",e=>{if(e.target.files[0])readCsv(e.target.files[0]);});
+["dragover","dragenter"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("drag");}));
+["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("drag");}));
+drop.addEventListener("drop",e=>{if(e.dataTransfer.files[0])readCsv(e.dataTransfer.files[0]);});
+function readCsv(file){const r=new FileReader();r.onload=()=>{csvText=r.result;srcSet(file.name);};r.readAsText(file);}
+function useDemo(p){csvText=synthCSV(p,20);srcSet((lang==="de"?"Demo · ":"demo · ")+(p==="guilty"?(lang==="de"?"Schuldig":"Guilty"):(lang==="de"?"Unschuldig":"Innocent")));runAnalysis();}
+function srcSet(n){$("srcName").textContent=n;}
+function opts(){return {notch:$("notchOn").checked,notchFreq:+$("notchFreq").value,bandpass:$("bpOn").checked,lo:+$("bpLo").value,hi:+$("bpHi").value,reject:$("rejOn").checked,rejectUv:+$("rejUv").value};}
+function setCh(c){curCh=c;document.querySelectorAll("#chsel button").forEach(b=>b.classList.toggle("on",b.textContent===c));if(result)renderOverlay();}
+function runAnalysis(){
+  if(!csvText){anaMsg("warn",lang==="de"?"Keine Daten — aufnehmen, CSV laden oder Demo wählen.":"No data — record, load a CSV or pick a demo.");return;}
+  try{result=analyzeERP(csvText,opts());$("results").style.display="block";$("emptyAnalyse").style.display="none";anaHide();renderAll();}
+  catch(e){result=null;$("results").style.display="none";$("emptyAnalyse").style.display="block";anaMsg("err",(lang==="de"?"Fehler: ":"Error: ")+e.message);}
+}
+function anaMsg(c,t){const m=$("anaMsg");m.style.display="block";m.className="status "+c;m.textContent=t;}
+function anaHide(){$("anaMsg").style.display="none";}
+
+function renderAll(){renderVerdict();renderOverlay();renderAllCh();renderTable();renderLegend();}
+function renderLegend(){const present=result.present;const mk=el=>el.innerHTML=present.map(id=>`<span><i style="background:${COL(id)}"></i>${LBL(id)}</span>`).join("")+`<span style="color:var(--faint)"><span data-de>schattiert: P300-Fenster</span><span data-en>shaded: P300 window</span></span>`;
+  mk($("legend"));mk($("legend2"));}
+function renderVerdict(){
+  const v=$("verdict");const rec=result.recognition;const tgt=result.targetOK;const bcd=result.bcd;
+  if(!rec){v.className="verdict";v.innerHTML=`<div class="vh"><span class="big slate">${lang==="de"?"Keine Auswertung möglich":"Cannot evaluate"}</span></div><div class="sub">${lang==="de"?"Es fehlen Sonden- oder Irrelevant-Epochen.":"Probe or irrelevant epochs are missing."}</div>`;return;}
+  const det=rec.detected;
+  v.className="verdict "+(det?"detected":"clear");
+  const head=det?(lang==="de"?"Verborgenes Wissen wahrscheinlich":"Concealed knowledge likely"):(lang==="de"?"Kein P300-Hinweis":"No P300 indication");
+
+  // BAD primary line
+  const stabBadge=rec.stable
+    ?`<span style="font-size:10px;background:rgba(70,224,200,.12);border:1px solid rgba(70,224,200,.3);color:var(--teal);border-radius:5px;padding:1px 7px;margin-left:6px;vertical-align:2px">${lang==="de"?"stabil":"stable"} ✓</span>`
+    :`<span style="font-size:10px;background:rgba(255,179,71,.1);border:1px solid rgba(255,179,71,.3);color:var(--amber);border-radius:5px;padding:1px 7px;margin-left:6px;vertical-align:2px">${lang==="de"?"variabel — mehr Epochen empfohlen":"variable — more epochs recommended"}</span>`;
+
+  const badLine=lang==="de"
+    ?`<b>BAD</b> Δ ${rec.deltaVsIrr} Einh., p = ${rec.p} (n = ${rec.n}, 2 × 10 000 Iterationen)${stabBadge}`
+    :`<b>BAD</b> Δ ${rec.deltaVsIrr} units, p = ${rec.p} (n = ${rec.n}, 2 × 10 000 iterations)${stabBadge}`;
+
+  // BCD secondary line
+  let bcdLine="";
+  if(bcd){
+    const bcdColor=bcd.detected?"var(--teal)":"var(--faint)";
+    const bcdLabel=bcd.detected?(lang==="de"?"stützt Wiedererkennung":"supports recognition"):(lang==="de"?"stützt KEIN Wiedererkennen":"does not support recognition");
+    const agreeIcon=(det===bcd.detected)?"✓":"↕";
+    const agreeCol=(det===bcd.detected)?"var(--teal)":"var(--amber)";
+    bcdLine=`<div style="margin-top:6px;font-size:11.5px;color:var(--mute)">
+      <b>BCD</b> r<sub>Probe→Ziel</sub> = ${bcd.rPT}, r<sub>Probe→Irr</sub> = ${bcd.rPI} · bootstrap-Anteil mit r<sub>PT</sub> > r<sub>PI</sub>: <b style="color:${bcdColor}">${(bcd.p*100).toFixed(1)} %</b> — ${bcdLabel} <span style="color:${agreeCol};font-size:12px">${agreeIcon}</span>
+      ${bcd.n_probe<30?`<span style="font-size:10.5px;color:var(--faint)">(${lang==="de"?"bei n < 30 Sonden-Epochen ist BCD weniger zuverlässig":"BCD less reliable below ~30 probe epochs"})</span>`:""}
+    </div>`;
+  }
+
+  const sub=det
+    ?(lang==="de"?`Das P300 an den Sonden liegt signifikant über Irrelevant. Das spricht für Wiedererkennung des tatbezogenen Bildes.`:`Probe P300 is significantly above irrelevant. This indicates recognition of the crime-related image.`)
+    :(lang==="de"?`Das Sonden-P300 liegt nicht klar über Irrelevant. Kein Hinweis auf Wiedererkennung.`:`Probe P300 is not clearly above irrelevant. No sign of recognition.`);
+
+  let qc="";
+  if(tgt===false)qc=`<div class="qc bad">${lang==="de"?"Positivkontrolle schwach: das Ziel zeigt kein erhöhtes P300 — Daten/Setup prüfen, bevor die Sonde interpretiert wird.":"Weak positive control: the target shows no elevated P300 — check data/setup before interpreting the probe."}</div>`;
+  else if(tgt===true)qc=`<div class="qc">${lang==="de"?"Positivkontrolle ok: das Ziel zeigt ein erhöhtes P300.":"Positive control ok: the target shows an elevated P300."}</div>`;
+
+  v.innerHTML=`<div class="vh"><span class="big ${det?"amber":"slate"}">${head}</span></div>
+<div class="sub">${sub}</div>
+<div style="margin-top:10px;padding:9px 12px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);font-size:11.5px;color:var(--mute)">
+  <div>${badLine}</div>${bcdLine}
+</div>${qc}`;
+}
+
+function vizFrame(W,H,padL,padR,padT,padB,times,traces,ids,shadeWin,fs,title){
+  const innerW=W-padL-padR,innerH=H-padT-padB;
+  let lo=1e9,hi=-1e9;ids.forEach(id=>{const a=traces[id];if(!a)return;for(const v of a){if(v<lo)lo=v;if(v>hi)hi=v;}});
+  const pad=(hi-lo)*0.1||1;lo-=pad;hi+=pad;
+  const x=t=>padL+innerW*(t-times[0])/(times[times.length-1]-times[0]);
+  const y=v=>padT+innerH*(1-(v-lo)/(hi-lo));
+  let s="";
+  if(shadeWin){const x0=x(shadeWin[0]),x1=x(shadeWin[1]);s+=`<rect x="${x0}" y="${padT}" width="${x1-x0}" height="${innerH}" fill="#FFB347" opacity=".07"/>`;}
+  for(let i=0;i<=3;i++){const v=lo+(hi-lo)*i/3,yy=y(v);s+=`<line x1="${padL}" y1="${yy}" x2="${W-padR}" y2="${yy}" stroke="#192330"/><text x="${padL-6}" y="${yy}" fill="#586675" font-size="8.5" text-anchor="end" dominant-baseline="central">${v.toFixed(1)}</text>`;}
+  if(0>=lo&&0<=hi)s+=`<line x1="${padL}" y1="${y(0)}" x2="${W-padR}" y2="${y(0)}" stroke="#3a4654"/>`;
+  s+=`<line x1="${x(0)}" y1="${padT}" x2="${x(0)}" y2="${padT+innerH}" stroke="#46E0C8" stroke-dasharray="4 3" opacity=".5"/>`;
+  [-0.2,0,0.2,0.4,0.6,0.8].forEach(t=>{if(t<times[0]||t>times[times.length-1])return;s+=`<text x="${x(t)}" y="${H-padB+13}" fill="#586675" font-size="8" text-anchor="middle">${t}</text>`;});
+  ids.forEach(id=>{const a=traces[id];if(!a)return;let d="";for(let i=0;i<a.length;i++)d+=(i?"L":"M")+x(times[i]).toFixed(1)+" "+y(a[i]).toFixed(1)+" ";s+=`<path d="${d}" fill="none" stroke="${COL(id)}" stroke-width="1.7" stroke-linejoin="round"/>`;});
+  if(title)s+=`<text x="${padL}" y="${padT-5}" fill="#8593A1" font-size="9" font-family='Space Grotesk'>${title}</text>`;
+  return s;
+}
+function renderOverlay(){
+  const W=900,H=320,times=result.times;const ids=result.present;
+  let s=`<svg class="viz" viewBox="0 0 ${W} ${H}" role="img" aria-label="ERP ${curCh}">`;
+  s+=vizFrame(W,H,46,16,18,34,times,result.traces[curCh],ids,result.p300Window,result.fs,null);
+  s+=`<text x="${46-6}" y="${13}" fill="#8593A1" font-size="9" text-anchor="end">µV</text><text x="${W-16}" y="${H-34+13}" fill="#8593A1" font-size="9" text-anchor="end">s · ${curCh}</text>`;
+  s+=`</svg>`;$("erpOverlay").innerHTML=s;
+}
+function renderAllCh(){
+  const chs=["Fz","C3","Cz","C4","Pz","PO7","Oz","PO8"];const times=result.times,ids=result.present;
+  const cols=4,rows=2,cellW=222,cellH=132,gap=8,W=cols*cellW+gap*(cols+1),H=rows*cellH+gap*(rows+1);
+  let s=`<svg class="viz" viewBox="0 0 ${W} ${H}" role="img" aria-label="all channels">`;
+  chs.forEach((ch,k)=>{const cx=gap+(k%cols)*(cellW+gap),cy=gap+Math.floor(k/cols)*(cellH+gap);
+    s+=`<g transform="translate(${cx},${cy})">`;
+    s+=vizFrame(cellW,cellH,30,8,16,20,times,result.traces.all[ch],ids,result.p300Window,result.fs,ch);
+    s+=`</g>`;});
+  s+=`</svg>`;$("erpAll").innerHTML=s;
+}
+function renderTable(){
+  const present=result.present;const rows=[];
+  const head=`<tr><th>${lang==="de"?"Bedingung":"condition"}</th><th>n</th><th>${lang==="de"?"P300-Mittel":"P300 mean"}</th><th>${lang==="de"?"Δ vs. Irrelevant (BAD)":"Δ vs irrelevant (BAD)"}</th><th>${lang==="de"?"Bootstrap-Stabilität":"Bootstrap stability"}</th></tr>`;
+  present.forEach(id=>{const p=result.p300[id];const pp=result.perProbe.find(x=>x.label===id);
+    const delta=pp&&pp.deltaVsIrr!==undefined?`${pp.deltaVsIrr>=0?"+":""}${pp.deltaVsIrr}${pp.p!==undefined?` (p ${pp.p})`:""}`:"—";
+    const stabHtml=pp&&pp.stable!==undefined?(pp.stable?`<span style="color:var(--teal)">✓</span>`:`<span style="color:var(--amber)">?</span>`):"—";
+    rows.push(`<tr><td><span class="sw" style="background:${COL(id)}"></span>${LBL(id)}</td><td>${p.n}</td><td class="num">${p.mean}</td><td>${delta}</td><td>${stabHtml}</td></tr>`);});
+  if(result.p300.probe){const r=result.recognition;rows.push(`<tr class="pool"><td><span class="sw" style="background:var(--c-pool)"></span>${lang==="de"?"Sonde (gepoolt)":"Probe (pooled)"}</td><td>${result.p300.probe.n}</td><td class="num">${result.p300.probe.mean}</td><td>${r?`${r.deltaVsIrr>=0?"+":""}${r.deltaVsIrr} (p ${r.p})`:"—"}</td><td>${r&&r.stable!==undefined?(r.stable?`<span style="color:var(--teal)">✓</span>`:`<span style="color:var(--amber)">?</span>`):"—"}</td></tr>`);}
+  $("ptable").innerHTML=`<table>${head}${rows.join("")}</table>`;
+}
+function dlERP(){if(!result)return;const e=result.traces,times=result.times,present=result.present;
+  const chs=["Fz","C3","Cz","C4","Pz","PO7","Oz","PO8"];
+  let header="time_s";chs.forEach(ch=>present.forEach(id=>header+=`,${ch}_${id}`));
+  let csv=header+"\n";
+  for(let i=0;i<times.length;i++){let row=times[i].toFixed(4);chs.forEach(ch=>present.forEach(id=>{const a=e.all[ch][id];row+=","+(a?a[i]:"");}));csv+=row+"\n";}
+  download("erp_averages.csv",csv,"text/csv");}
+
+/* ===== init ===== */
+buildCodePanels();renderImages();imgStatus();checkServer();
+</script>
+</body>
+</html>
