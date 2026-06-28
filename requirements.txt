@@ -1,0 +1,16 @@
+mne==1.9
+numpy
+matplotlib
+notebook
+ipykernel
+ipympl
+torch
+braindecode
+pandas
+seaborn
+scikit-learn
+pylsl
+pyKey
+pynput
+# braindecode
+# ptytorch
