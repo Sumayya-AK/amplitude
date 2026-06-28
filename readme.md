@@ -78,32 +78,21 @@ To collect EEG data while playing the game, follow these steps:
     - Use a notch filter at 50 Hz to remove power line noise.
     - use the OSCAR filter if you want to remove eye blinks and muscle artifacts.
 
-1. Run the `data_collection.py` script to start collecting the EEG data and the key logger
+1. Run the `cit_server.py` script to start collecting the EEG data and analyse the data
 
-```bash
-# run from the root of the repository
-python -m data.data_collection
-```
 
 1. After you finish playing the game, stop the data collection script by pressing `Ctrl + C` in the terminal.
 
-After collecting the data you can run the `combine_data.py` script in the data folder to merge the logged key presses with the EEG data. Make sure the that the `event_ids` json file maps all the key events you are interessted in (should only include space bra pressed for Canabalt).
-
 ## Data Analysis 🔍
 
-Once you have collected the EEG data, you can analyze it using the provided notebook `signal_analysis.ipynb`. 
-This notebook includes the following steps:
+Once you have collected the EEG data, you can analyze it using the analysis tab. 
+This includes the following steps:
 
-1. Load the EEG data and the key press events.
-1. Preprocess the data (e.g., filtering, epoching).
-1. Visualize the results.
+1. Load the EEG data 
+2. Preprocess the data (e.g., filtering, epoching).
+3. Visualize the results.
 
-## Training a Classifier 🏋️
 
-There is a folder called `features` to define the feature extraction methods and a class to build the final feature extractor. \
-The model machine learning models and deep learning architectures should be stored in the `models` folder. \
-To train a classifier, you can use the provided scripts in the `train` folder.
+## EEG LIE DETECTION
 
-## EEG Control 🧠
-
-To control the game using EEG signals you can use the `eeg_keyboard.py` script in the utils folder. Add your trained model from the `checkpoints` folder to the script and run it. Depending on your setup you have to change what data is given to the model.
+Lie can be detected based on the ERP signals, especially P300. CIT test is used to identify weather the suspect is lying.
